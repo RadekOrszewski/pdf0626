@@ -1,1 +1,601 @@
-Star Trek rulez :)
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lead Times — 2024 / 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFBF8;
+    --surface:#FFFFFF;
+    --ink:#0E1116;
+    --muted:#6B7280;
+    --line:#E6E5DE;
+    --line-strong:#1F2937;
+    --c-s:#2563EB;
+    --c-m:#D97706;
+    --c-l:#B91C1C;
+    --c-all:#1F2937;
+    --radius:6px;
+    --shadow:0 1px 2px rgba(14,17,22,.04), 0 0 0 1px var(--line);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .dash{
+    max-width:1100px;
+    margin:0 auto;
+    padding:40px 28px 64px;
+  }
+  header{margin-bottom:28px}
+  .eyebrow{
+    font-family:'JetBrains Mono',ui-monospace,monospace;
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 8px;
+  }
+  h1{
+    font-size:clamp(28px,4vw,40px);
+    font-weight:700;
+    letter-spacing:-0.02em;
+    line-height:1.05;
+    margin:0 0 10px;
+  }
+  .lede{
+    color:var(--muted);
+    max-width:62ch;
+    margin:0;
+    font-size:15px;
+  }
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    margin:28px 0 16px;
+  }
+  .chips-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:.06em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin-right:4px;
+  }
+  .chip{
+    appearance:none;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+    padding:7px 14px;
+    border-radius:999px;
+    font:inherit;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:background .15s,border-color .15s,color .15s;
+  }
+  .chip:hover{border-color:#C7C5BC}
+  .chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .chip .count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    font-weight:500;
+  }
+  .chip.is-active{
+    background:var(--ink);
+    color:#fff;
+    border-color:var(--ink);
+  }
+  .chip.is-active .count{color:rgba(255,255,255,.7)}
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    display:inline-block;
+    flex-shrink:0;
+  }
+  .dot-s{background:var(--c-s)}
+  .dot-m{background:var(--c-m)}
+  .dot-l{background:var(--c-l)}
+
+  .card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .chart-card{
+    padding:24px 20px 16px;
+    position:relative;
+  }
+  .chart-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:12px;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .chart-title{
+    font-size:13px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:-.01em;
+  }
+  .chart-sub{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    margin:0;
+  }
+  .chart-wrap{position:relative;width:100%}
+  svg.chart{display:block;width:100%;height:auto;overflow:visible}
+  .axis-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    fill:var(--muted);
+  }
+  .axis-title{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    fill:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+  }
+  .grid line{stroke:var(--line);stroke-width:1;shape-rendering:crispEdges}
+  .axis line{stroke:#C7C5BC;stroke-width:1;shape-rendering:crispEdges}
+  .pct-line{
+    stroke:var(--line-strong);
+    stroke-width:1;
+    stroke-dasharray:3 3;
+    opacity:.85;
+    transition:transform .35s cubic-bezier(.4,.0,.2,1), opacity .25s;
+  }
+  .pct-label-bg{fill:var(--surface);stroke:var(--line-strong);stroke-width:1}
+  .pct-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:600;
+    fill:var(--ink);
+  }
+  .pt{
+    cursor:pointer;
+    transition:opacity .25s,transform .15s;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  .pt:hover{transform:scale(1.4)}
+  .pt.is-hidden{opacity:.08;pointer-events:none}
+  .pt-s{fill:var(--c-s)}
+  .pt-m{fill:var(--c-m)}
+  .pt-l{fill:var(--c-l)}
+
+  .tooltip{
+    position:absolute;
+    background:var(--ink);
+    color:#fff;
+    padding:8px 10px;
+    border-radius:4px;
+    font-size:12px;
+    line-height:1.45;
+    pointer-events:none;
+    z-index:10;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+    white-space:nowrap;
+    transform:translate(-50%,calc(-100% - 10px));
+  }
+  .tooltip .tt-date{
+    color:rgba(255,255,255,.6);
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+  .tooltip .tt-main{font-weight:600;margin-top:1px}
+  .tooltip .tt-size{
+    display:inline-block;
+    margin-left:6px;
+    padding:1px 6px;
+    border-radius:3px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:500;
+  }
+  .tt-size.s{background:rgba(37,99,235,.25);color:#A5C0FF}
+  .tt-size.m{background:rgba(217,119,6,.25);color:#FFC681}
+  .tt-size.l{background:rgba(185,28,28,.25);color:#FFA8A8}
+
+  .pct-section{
+    margin-top:28px;
+    padding:24px;
+  }
+  .pct-section h2{
+    font-size:13px;
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .pct-section .desc{
+    font-size:12px;
+    color:var(--muted);
+    margin:0 0 18px;
+  }
+  table.pct-table{
+    width:100%;
+    border-collapse:collapse;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+  }
+  table.pct-table th{
+    text-align:right;
+    font-weight:500;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    padding:8px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  table.pct-table th:first-child{text-align:left}
+  table.pct-table td{
+    text-align:right;
+    padding:12px;
+    border-bottom:1px solid var(--line);
+    font-weight:500;
+  }
+  table.pct-table td:first-child{
+    text-align:left;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+  }
+  table.pct-table tr:last-child td{border-bottom:none}
+  table.pct-table tr.row-all td{
+    background:#F5F4EE;
+  }
+  .group-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .group-tag .dot{width:9px;height:9px}
+  .unit{
+    font-size:10px;
+    color:var(--muted);
+    font-weight:400;
+    margin-left:2px;
+  }
+  footer{
+    margin-top:24px;
+    font-size:11px;
+    color:var(--muted);
+    font-family:'JetBrains Mono',monospace;
+    text-align:right;
+    letter-spacing:.03em;
+  }
+
+  @media (max-width:600px){
+    .dash{padding:24px 16px 48px}
+    .chart-card{padding:18px 12px 12px}
+    .pct-section{padding:18px}
+    table.pct-table th, table.pct-table td{padding:10px 8px;font-size:12px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition:none !important;animation:none !important}
+  }
+</style>
+</head>
+<body>
+<main class="dash">
+  <header>
+    <p class="eyebrow">Lead Times · 2024 — 2025 · n=36</p>
+    <h1>Czasy realizacji zadań</h1>
+    <p class="lede">Rozkład czasów realizacji w dniach według deklarowanego rozmiaru. Linie przerywane na wykresie pokazują 50, 85 i 95 percentyl dla aktywnego filtra.</p>
+  </header>
+
+  <div class="controls" role="group" aria-label="Filtr rozmiaru">
+    <span class="chips-label">Filtr</span>
+    <button class="chip is-active" data-filter="ALL">Wszystkie <span class="count">36</span></button>
+    <button class="chip" data-filter="S"><span class="dot dot-s"></span>S <span class="count">13</span></button>
+    <button class="chip" data-filter="M"><span class="dot dot-m"></span>M <span class="count">14</span></button>
+    <button class="chip" data-filter="L"><span class="dot dot-l"></span>L <span class="count">9</span></button>
+  </div>
+
+  <section class="card chart-card">
+    <div class="chart-head">
+      <h2 class="chart-title">Czas realizacji w czasie</h2>
+      <p class="chart-sub" id="chartSub">Wszystkie rozmiary · 36 punktów</p>
+    </div>
+    <div class="chart-wrap" id="chartWrap">
+      <svg class="chart" id="chart" viewBox="0 0 900 480" preserveAspectRatio="xMidYMid meet" aria-label="Wykres punktowy czasu realizacji"></svg>
+      <div class="tooltip" id="tooltip" hidden></div>
+    </div>
+  </section>
+
+  <section class="card pct-section">
+    <h2>Percentyle czasu realizacji</h2>
+    <p class="desc">Wartości w dniach. Percentyle obliczone metodą interpolacji liniowej.</p>
+    <table class="pct-table" id="pctTable">
+      <thead>
+        <tr><th>Grupa</th><th>n</th><th>P50</th><th>P85</th><th>P95</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <footer>Źródło: Lead_Times_2024–25 · wygenerowano automatycznie</footer>
+</main>
+
+<script>
+const DATA = [{"date":"2024-07-15","label":"15 Lipca 2024","size":"S","lt":49},{"date":"2024-08-22","label":"22 Sierpnia 2024","size":"S","lt":48},{"date":"2024-09-10","label":"10 Września 2024","size":"S","lt":87},{"date":"2024-09-25","label":"25 Września 2024","size":"M","lt":57},{"date":"2024-10-05","label":"5 Października 2024","size":"M","lt":148},{"date":"2024-10-14","label":"14 Października 2024","size":"S","lt":53},{"date":"2024-10-28","label":"28 Października 2024","size":"S","lt":45},{"date":"2024-11-18","label":"18 Listopada 2024","size":"M","lt":145},{"date":"2024-12-04","label":"4 Grudnia 2024","size":"L","lt":105},{"date":"2025-01-08","label":"8 Stycznia 2025","size":"S","lt":5},{"date":"2025-01-20","label":"20 Stycznia 2025","size":"L","lt":163},{"date":"2025-02-14","label":"14 Lutego 2025","size":"S","lt":43},{"date":"2025-02-26","label":"26 Lutego 2025","size":"M","lt":415},{"date":"2025-03-15","label":"15 Marca 2025","size":"L","lt":123},{"date":"2025-04-10","label":"10 Kwietnia 2025","size":"M","lt":103},{"date":"2025-05-05","label":"5 Maja 2025","size":"L","lt":104},{"date":"2025-06-12","label":"12 Czerwca 2025","size":"L","lt":302},{"date":"2025-06-25","label":"25 Czerwca 2025","size":"L","lt":158},{"date":"2025-07-02","label":"2 Lipca 2025","size":"L","lt":98},{"date":"2025-07-11","label":"11 Lipca 2025","size":"S","lt":52},{"date":"2025-07-18","label":"18 Lipca 2025","size":"M","lt":95},{"date":"2025-07-29","label":"29 Lipca 2025","size":"S","lt":70},{"date":"2025-08-03","label":"3 Sierpnia 2025","size":"M","lt":95},{"date":"2025-08-14","label":"14 Sierpnia 2025","size":"M","lt":101},{"date":"2025-08-21","label":"21 Sierpnia 2025","size":"M","lt":57},{"date":"2025-08-29","label":"29 Sierpnia 2025","size":"M","lt":57},{"date":"2025-09-08","label":"8 Września 2025","size":"S","lt":53},{"date":"2025-09-22","label":"22 Września 2025","size":"L","lt":137},{"date":"2025-10-04","label":"4 Października 2025","size":"S","lt":73},{"date":"2025-10-12","label":"12 Października 2025","size":"M","lt":60},{"date":"2025-10-19","label":"19 Października 2025","size":"S","lt":126},{"date":"2025-10-27","label":"27 Października 2025","size":"M","lt":57},{"date":"2025-11-05","label":"5 Listopada 2025","size":"L","lt":124},{"date":"2025-11-15","label":"15 Listopada 2025","size":"M","lt":75},{"date":"2025-11-25","label":"25 Listopada 2025","size":"M","lt":89},{"date":"2025-12-10","label":"10 Grudnia 2025","size":"S","lt":44}];
+
+const PL_MONTHS_SHORT = ['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz','Paź','Lis','Gru'];
+const COLOR = {S:'#2563EB', M:'#D97706', L:'#B91C1C', ALL:'#1F2937'};
+
+// Parse dates once
+DATA.forEach(d => d.ts = new Date(d.date).getTime());
+
+// --- Percentile (linear interpolation) ---
+function percentile(arr, p){
+  if(!arr.length) return null;
+  const s = [...arr].sort((a,b)=>a-b);
+  const idx = (s.length-1) * p/100;
+  const lo = Math.floor(idx), hi = Math.min(lo+1, s.length-1);
+  return s[lo] + (idx-lo)*(s[hi]-s[lo]);
+}
+
+function statsFor(size){
+  const arr = (size==='ALL' ? DATA : DATA.filter(d=>d.size===size)).map(d=>d.lt);
+  return {
+    n: arr.length,
+    p50: percentile(arr,50),
+    p85: percentile(arr,85),
+    p95: percentile(arr,95),
+  };
+}
+
+// --- Chart geometry ---
+const VB = {w:900, h:480};
+const M = {top:30, right:90, bottom:54, left:60};
+const PLOT = {w:VB.w - M.left - M.right, h:VB.h - M.top - M.bottom};
+
+const tMin = Math.min(...DATA.map(d=>d.ts));
+const tMax = Math.max(...DATA.map(d=>d.ts));
+const tPad = (tMax - tMin) * 0.03;
+const tDomain = [tMin - tPad, tMax + tPad];
+
+const ltMax = Math.max(...DATA.map(d=>d.lt));
+const yMax = Math.ceil(ltMax / 50) * 50;
+const yDomain = [0, yMax];
+
+function xScale(t){
+  return M.left + (t - tDomain[0]) / (tDomain[1] - tDomain[0]) * PLOT.w;
+}
+function yScale(v){
+  return M.top + PLOT.h - (v - yDomain[0]) / (yDomain[1] - yDomain[0]) * PLOT.h;
+}
+
+// --- Render chart skeleton ---
+const svg = document.getElementById('chart');
+const NS = 'http://www.w3.org/2000/svg';
+function el(name, attrs={}){
+  const e = document.createElementNS(NS, name);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+function drawAxes(){
+  // Y gridlines + labels
+  const yTicks = [];
+  const tickStep = yMax <= 200 ? 50 : (yMax <= 500 ? 100 : 200);
+  for(let v=0; v<=yMax; v+=tickStep) yTicks.push(v);
+  const gGrid = el('g', {class:'grid'});
+  yTicks.forEach(v=>{
+    gGrid.appendChild(el('line', {x1:M.left, x2:M.left+PLOT.w, y1:yScale(v), y2:yScale(v)}));
+    const t = el('text', {x:M.left-10, y:yScale(v)+3, 'text-anchor':'end', class:'axis-label'});
+    t.textContent = v;
+    gGrid.appendChild(t);
+  });
+  svg.appendChild(gGrid);
+
+  // X ticks: monthly
+  const xAxis = el('g', {class:'axis'});
+  xAxis.appendChild(el('line', {x1:M.left, x2:M.left+PLOT.w, y1:M.top+PLOT.h, y2:M.top+PLOT.h}));
+
+  // Generate monthly labels
+  const start = new Date(tDomain[0]);
+  const end = new Date(tDomain[1]);
+  const months = [];
+  let cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  while(cur.getTime() <= end.getTime()){
+    months.push(new Date(cur));
+    cur.setMonth(cur.getMonth()+1);
+  }
+  // skip every other if too dense
+  const step = months.length > 10 ? 2 : 1;
+  months.forEach((m, i)=>{
+    if(i % step !== 0) return;
+    const x = xScale(m.getTime());
+    if(x < M.left-2 || x > M.left+PLOT.w+2) return;
+    xAxis.appendChild(el('line', {x1:x, x2:x, y1:M.top+PLOT.h, y2:M.top+PLOT.h+5, stroke:'#C7C5BC'}));
+    const label = el('text', {x:x, y:M.top+PLOT.h+18, 'text-anchor':'middle', class:'axis-label'});
+    const monthName = PL_MONTHS_SHORT[m.getMonth()];
+    label.textContent = m.getMonth()===0 ? `${monthName} ${m.getFullYear()}` : monthName;
+    if(m.getMonth()===0){
+      label.setAttribute('font-weight','600');
+      label.setAttribute('fill','#374151');
+    }
+    xAxis.appendChild(label);
+  });
+  svg.appendChild(xAxis);
+
+  // Axis titles
+  const yTitle = el('text', {
+    x: -(M.top + PLOT.h/2),
+    y: 16,
+    transform:'rotate(-90)',
+    'text-anchor':'middle',
+    class:'axis-title'
+  });
+  yTitle.textContent = 'Czas realizacji (dni)';
+  svg.appendChild(yTitle);
+
+  const xTitle = el('text', {
+    x: M.left + PLOT.w/2,
+    y: VB.h - 6,
+    'text-anchor':'middle',
+    class:'axis-title'
+  });
+  xTitle.textContent = 'Data ukończenia';
+  svg.appendChild(xTitle);
+}
+
+// --- Points ---
+const ptsGroup = el('g', {class:'pts'});
+svg.appendChild(ptsGroup);
+const pointEls = [];
+DATA.forEach((d,i)=>{
+  const cx = xScale(d.ts);
+  const cy = yScale(d.lt);
+  const c = el('circle', {
+    cx, cy, r:5.5,
+    class:`pt pt-${d.size.toLowerCase()}`,
+    'data-i': i,
+    'fill-opacity':'0.78',
+    'stroke':'#fff',
+    'stroke-width':'1.2',
+  });
+  ptsGroup.appendChild(c);
+  pointEls.push(c);
+});
+
+// --- Percentile lines group (rendered last so on top) ---
+const pctGroup = el('g', {class:'pct-lines'});
+svg.appendChild(pctGroup);
+
+function renderPercentileLines(filter){
+  // Clear
+  while(pctGroup.firstChild) pctGroup.removeChild(pctGroup.firstChild);
+  const s = statsFor(filter);
+  if(s.n === 0) return;
+  const labels = [['P50', s.p50],['P85', s.p85],['P95', s.p95]];
+  labels.forEach(([name, v])=>{
+    if(v == null) return;
+    const y = yScale(v);
+    pctGroup.appendChild(el('line', {
+      class:'pct-line',
+      x1:M.left, x2:M.left+PLOT.w, y1:y, y2:y
+    }));
+    // Label on right
+    const labelText = `${name} ${Math.round(v)}d`;
+    const w = labelText.length * 6.2 + 10;
+    const rectX = M.left + PLOT.w + 4;
+    pctGroup.appendChild(el('rect', {
+      class:'pct-label-bg',
+      x:rectX, y:y-9, width:w, height:18, rx:3
+    }));
+    const t = el('text', {
+      class:'pct-label',
+      x: rectX + w/2,
+      y: y + 4,
+      'text-anchor':'middle'
+    });
+    t.textContent = labelText;
+    pctGroup.appendChild(t);
+  });
+}
+
+// --- Tooltip ---
+const tooltip = document.getElementById('tooltip');
+const chartWrap = document.getElementById('chartWrap');
+function showTip(i, evt){
+  const d = DATA[i];
+  const sLower = d.size.toLowerCase();
+  tooltip.innerHTML = `
+    <div class="tt-date">${d.label}</div>
+    <div class="tt-main">${d.lt} dni<span class="tt-size ${sLower}">${d.size}</span></div>
+  `;
+  tooltip.hidden = false;
+  // Position based on point screen coords
+  const rect = svg.getBoundingClientRect();
+  const wrapRect = chartWrap.getBoundingClientRect();
+  const cx = xScale(d.ts), cy = yScale(d.lt);
+  const px = rect.left + (cx / VB.w) * rect.width - wrapRect.left;
+  const py = rect.top + (cy / VB.h) * rect.height - wrapRect.top;
+  tooltip.style.left = px + 'px';
+  tooltip.style.top = py + 'px';
+}
+function hideTip(){tooltip.hidden = true}
+
+pointEls.forEach((c, i)=>{
+  c.addEventListener('mouseenter', e=>showTip(i,e));
+  c.addEventListener('mouseleave', hideTip);
+  c.addEventListener('focus', e=>showTip(i,e));
+  c.addEventListener('blur', hideTip);
+});
+
+// --- Filter chips ---
+let activeFilter = 'ALL';
+const chips = document.querySelectorAll('.chip');
+const chartSub = document.getElementById('chartSub');
+
+function applyFilter(f){
+  activeFilter = f;
+  chips.forEach(c => c.classList.toggle('is-active', c.dataset.filter === f));
+  pointEls.forEach((c,i)=>{
+    const d = DATA[i];
+    if(f === 'ALL' || d.size === f) c.classList.remove('is-hidden');
+    else c.classList.add('is-hidden');
+  });
+  renderPercentileLines(f);
+  const s = statsFor(f);
+  const label = f === 'ALL' ? 'Wszystkie rozmiary' : `Rozmiar ${f}`;
+  chartSub.textContent = `${label} · ${s.n} ${s.n===1?'punkt':(s.n<5?'punkty':'punktów')}`;
+  hideTip();
+}
+
+chips.forEach(c => c.addEventListener('click', ()=>applyFilter(c.dataset.filter)));
+
+// --- Percentile table (always all groups) ---
+function renderTable(){
+  const tbody = document.querySelector('#pctTable tbody');
+  const groups = [
+    {key:'S', label:'S', color:'var(--c-s)'},
+    {key:'M', label:'M', color:'var(--c-m)'},
+    {key:'L', label:'L', color:'var(--c-l)'},
+    {key:'ALL', label:'Wspólne', color:'var(--c-all)'},
+  ];
+  tbody.innerHTML = groups.map(g=>{
+    const s = statsFor(g.key);
+    const dot = g.key === 'ALL' ? '' : `<span class="dot" style="background:${g.color}"></span>`;
+    return `<tr class="${g.key==='ALL'?'row-all':''}">
+      <td><span class="group-tag">${dot}${g.label}</span></td>
+      <td>${s.n}</td>
+      <td>${Math.round(s.p50)}<span class="unit">d</span></td>
+      <td>${Math.round(s.p85)}<span class="unit">d</span></td>
+      <td>${Math.round(s.p95)}<span class="unit">d</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// --- Init ---
+drawAxes();
+renderPercentileLines('ALL');
+renderTable();
+</script>
+</body>
+</html>
