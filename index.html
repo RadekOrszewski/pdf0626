@@ -288,11 +288,195 @@
     letter-spacing:.03em;
   }
 
+  /* Tabs */
+  .tabs{
+    display:flex;
+    gap:0;
+    border-bottom:1px solid var(--line);
+    margin:24px 0 28px;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .tab{
+    appearance:none;
+    background:none;
+    border:none;
+    font:inherit;
+    font-size:14px;
+    font-weight:500;
+    color:var(--muted);
+    padding:10px 0;
+    margin-right:28px;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    margin-bottom:-1px;
+    transition:color .15s,border-color .15s;
+    white-space:nowrap;
+    display:inline-flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2px}
+  .tab.is-active{
+    color:var(--ink);
+    border-bottom-color:var(--ink);
+  }
+  .tab .tab-meta{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:500;
+    color:var(--muted);
+    letter-spacing:.04em;
+  }
+  [role="tabpanel"][hidden]{display:none}
+
+  /* XMR chart */
+  .process-line{
+    fill:none;
+    stroke:#1F2937;
+    stroke-width:1.5;
+    stroke-linejoin:round;
+    stroke-linecap:round;
+    opacity:.55;
+  }
+  .cl-line{
+    stroke:#6B7280;
+    stroke-width:1.2;
+    shape-rendering:crispEdges;
+  }
+  .limit-line{
+    stroke:#B91C1C;
+    stroke-width:1;
+    stroke-dasharray:4 3;
+    shape-rendering:crispEdges;
+  }
+  .xmr-pt{
+    fill:#1F2937;
+    stroke:#fff;
+    stroke-width:1.4;
+    cursor:pointer;
+    transition:transform .15s;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  .xmr-pt:hover{transform:scale(1.5)}
+  .xmr-pt.ooc{fill:#B91C1C}
+  .xmr-pane-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    fill:var(--ink);
+    letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+  .xmr-pane-sub{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    fill:var(--muted);
+  }
+  .limit-label-bg{fill:var(--surface);stroke:#B91C1C;stroke-width:1}
+  .limit-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:600;
+    fill:#B91C1C;
+  }
+  .cl-label-bg{fill:var(--surface);stroke:#6B7280;stroke-width:1}
+  .cl-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:600;
+    fill:#374151;
+  }
+
+  /* XMR status & stat cards */
+  .xmr-status{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px 18px;
+    align-items:center;
+    margin:0 0 22px;
+  }
+  .status-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:.02em;
+  }
+  .status-pill::before{
+    content:'';
+    width:6px;height:6px;border-radius:50%;
+    background:currentColor;
+    flex-shrink:0;
+  }
+  .status-pill.ok{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0}
+  .status-pill.alert{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
+  .status-note{
+    font-size:12px;
+    color:var(--muted);
+    margin:0;
+  }
+
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .stat-cell{
+    padding:14px 16px;
+    background:var(--surface);
+  }
+  .stat-cell .stat-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 6px;
+    display:block;
+  }
+  .stat-cell .stat-value{
+    font-family:'JetBrains Mono',monospace;
+    font-size:22px;
+    font-weight:600;
+    color:var(--ink);
+    letter-spacing:-.02em;
+    line-height:1.1;
+  }
+  .stat-cell .stat-value .unit{
+    font-size:12px;
+    font-weight:400;
+    color:var(--muted);
+    margin-left:3px;
+    letter-spacing:0;
+  }
+  .stat-cell .stat-desc{
+    font-size:11px;
+    color:var(--muted);
+    margin:6px 0 0;
+    line-height:1.4;
+  }
+  .stat-cell.is-limit .stat-value{color:#B91C1C}
+  .stat-cell.is-cl .stat-value{color:#374151}
+
   @media (max-width:600px){
     .dash{padding:24px 16px 48px}
     .chart-card{padding:18px 12px 12px}
     .pct-section{padding:18px}
     table.pct-table th, table.pct-table td{padding:10px 8px;font-size:12px}
+    .tab{margin-right:20px;font-size:13px}
+    .stat-cell{padding:12px 14px}
+    .stat-cell .stat-value{font-size:18px}
   }
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{transition:none !important;animation:none !important}
@@ -302,11 +486,17 @@
 <body>
 <main class="dash">
   <header>
-    <p class="eyebrow">Lead Times · 2024 — 2025 · n=36</p>
+    <p class="eyebrow">Analiza czasu realizacji · 2024 / 2025</p>
     <h1>Czasy realizacji zadań</h1>
-    <p class="lede">Rozkład czasów realizacji w dniach według deklarowanego rozmiaru. Linie przerywane na wykresie pokazują 50, 85 i 95 percentyl dla aktywnego filtra.</p>
+    <p class="lede">Dwie perspektywy na ten sam temat: rozkład czasów realizacji według rozmiaru oraz karta kontrolna XMR pokazująca stabilność procesu w czasie.</p>
   </header>
 
+  <nav class="tabs" role="tablist" aria-label="Widoki dashboardu">
+    <button class="tab is-active" role="tab" id="tab-scatter" aria-selected="true" aria-controls="panel-scatter" data-tab="scatter">Scatterplot <span class="tab-meta">36 zadań</span></button>
+    <button class="tab" role="tab" id="tab-xmr" aria-selected="false" aria-controls="panel-xmr" data-tab="xmr" tabindex="-1">XMR <span class="tab-meta">30 obserwacji</span></button>
+  </nav>
+
+  <section role="tabpanel" id="panel-scatter" aria-labelledby="tab-scatter">
   <div class="controls" role="group" aria-label="Filtr rozmiaru">
     <span class="chips-label">Filtr</span>
     <button class="chip is-active" data-filter="ALL">Wszystkie <span class="count">36</span></button>
@@ -336,8 +526,29 @@
       <tbody></tbody>
     </table>
   </section>
+  </section><!-- /panel-scatter -->
 
-  <footer>Źródło: Lead_Times_2024–25 · wygenerowano automatycznie</footer>
+  <section role="tabpanel" id="panel-xmr" aria-labelledby="tab-xmr" hidden>
+    <section class="card chart-card">
+      <div class="chart-head">
+        <h2 class="chart-title">Karta kontrolna XMR — Cycle Time</h2>
+        <p class="chart-sub">Indywidualne wartości (X) i ruchomy rozstęp (MR) · n=30</p>
+      </div>
+      <div class="chart-wrap" id="xmrChartWrap">
+        <svg class="chart" id="xmrChart" viewBox="0 0 900 620" preserveAspectRatio="xMidYMid meet" aria-label="Karta kontrolna XMR"></svg>
+        <div class="tooltip" id="xmrTooltip" hidden></div>
+      </div>
+    </section>
+
+    <section class="card pct-section">
+      <h2>Parametry karty kontrolnej</h2>
+      <p class="desc">Stałe SPC dla podgrup wielkości n=2 (d<tspan>₂</tspan>≈1,128): UCL/LCL dla X liczone jako X̄ ± 2,66·MR̄; UCL dla MR jako 3,267·MR̄.</p>
+      <div class="xmr-status" id="xmrStatus"></div>
+      <div class="stat-grid" id="xmrStats"></div>
+    </section>
+  </section><!-- /panel-xmr -->
+
+  <footer>Źródła: Lead_Times_2024–25 · Team_Cycle_Time_for_XMR · wygenerowano automatycznie</footer>
 </main>
 
 <script>
@@ -591,6 +802,344 @@ function renderTable(){
     </tr>`;
   }).join('');
 }
+
+// =====================================================
+// XMR (Individuals / Moving Range) Chart
+// =====================================================
+const XMR_DATA = [{"id":1,"started":"2023-11-28","closed":"2024-01-05","ct":38},{"id":2,"started":"2023-12-20","closed":"2024-01-11","ct":24},{"id":3,"started":"2024-01-02","closed":"2024-01-16","ct":14},{"id":4,"started":"2024-01-10","closed":"2024-01-17","ct":9},{"id":5,"started":"2024-01-18","closed":"2024-01-22","ct":4},{"id":6,"started":"2024-01-03","closed":"2024-01-26","ct":25},{"id":7,"started":"2024-01-10","closed":"2024-01-29","ct":19},{"id":8,"started":"2023-12-19","closed":"2024-02-06","ct":51},{"id":9,"started":"2023-12-26","closed":"2024-02-12","ct":48},{"id":10,"started":"2024-02-02","closed":"2024-02-15","ct":15},{"id":11,"started":"2024-01-26","closed":"2024-02-17","ct":22},{"id":12,"started":"2024-01-09","closed":"2024-02-18","ct":42},{"id":13,"started":"2024-02-02","closed":"2024-02-19","ct":17},{"id":14,"started":"2024-02-16","closed":"2024-02-21","ct":7},{"id":15,"started":"2024-02-23","closed":"2024-02-28","ct":5},{"id":16,"started":"2024-02-20","closed":"2024-03-12","ct":20},{"id":17,"started":"2024-01-12","closed":"2024-03-14","ct":63},{"id":18,"started":"2024-03-13","closed":"2024-03-19","ct":6},{"id":19,"started":"2024-01-25","closed":"2024-03-20","ct":56},{"id":20,"started":"2024-02-28","closed":"2024-03-22","ct":24},{"id":21,"started":"2024-02-28","closed":"2024-03-22","ct":22},{"id":22,"started":"2024-02-06","closed":"2024-03-26","ct":50},{"id":23,"started":"2024-03-21","closed":"2024-03-27","ct":8},{"id":24,"started":"2024-03-26","closed":"2024-03-28","ct":2},{"id":25,"started":"2024-03-28","closed":"2024-03-29","ct":3},{"id":26,"started":"2024-03-22","closed":"2024-03-30","ct":8},{"id":27,"started":"2024-02-26","closed":"2024-04-01","ct":36},{"id":28,"started":"2024-03-06","closed":"2024-04-02","ct":27},{"id":29,"started":"2024-03-13","closed":"2024-04-09","ct":29},{"id":30,"started":"2024-03-20","closed":"2024-04-09","ct":20}];
+
+XMR_DATA.forEach(d => d.ts = new Date(d.closed).getTime());
+
+function computeXMR(data){
+  const xs = data.map(d=>d.ct);
+  const n = xs.length;
+  const xbar = xs.reduce((a,b)=>a+b,0) / n;
+  const mrs = [];
+  for(let i=1;i<n;i++) mrs.push(Math.abs(xs[i]-xs[i-1]));
+  const mrbar = mrs.reduce((a,b)=>a+b,0) / mrs.length;
+  const ucl_x = xbar + 2.66*mrbar;
+  const lcl_x_raw = xbar - 2.66*mrbar;
+  const lcl_x = Math.max(0, lcl_x_raw);
+  const ucl_mr = 3.267*mrbar;
+  return {xs, mrs, xbar, mrbar, ucl_x, lcl_x, lcl_x_raw, ucl_mr, n};
+}
+
+const XMR_STATS = computeXMR(XMR_DATA);
+
+// --- XMR chart geometry ---
+const XVB = {w:900, h:620};
+const XM = {top:44, right:92, bottom:60, left:60};
+const X_PANE = {top:44, h:260};                     // I chart
+const MR_PANE = {top:362, h:160};                   // MR chart
+const X_PLOT_W = XVB.w - XM.left - XM.right;
+
+// Time scale spans both panes
+const xmrTs = XMR_DATA.map(d=>d.ts);
+const xmrTMin = Math.min(...xmrTs);
+const xmrTMax = Math.max(...xmrTs);
+const xmrTPad = (xmrTMax - xmrTMin) * 0.04;
+const xmrTDomain = [xmrTMin - xmrTPad, xmrTMax + xmrTPad];
+
+function xmrXScale(t){
+  return XM.left + (t - xmrTDomain[0]) / (xmrTDomain[1] - xmrTDomain[0]) * X_PLOT_W;
+}
+
+// Y scales per pane
+const I_YMAX = Math.ceil(Math.max(XMR_STATS.ucl_x, Math.max(...XMR_STATS.xs)) * 1.12 / 10) * 10;
+const MR_YMAX = Math.ceil(Math.max(XMR_STATS.ucl_mr, Math.max(...XMR_STATS.mrs)) * 1.12 / 10) * 10;
+
+function iYScale(v){
+  return X_PANE.top + X_PANE.h - (v / I_YMAX) * X_PANE.h;
+}
+function mrYScale(v){
+  return MR_PANE.top + MR_PANE.h - (v / MR_YMAX) * MR_PANE.h;
+}
+
+const xmrSvg = document.getElementById('xmrChart');
+function xel(name, attrs={}){
+  const e = document.createElementNS(NS, name);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+function drawXMRAxes(){
+  // I chart Y grid
+  const iTicks = [];
+  const iStep = I_YMAX <= 50 ? 10 : (I_YMAX <= 100 ? 20 : 50);
+  for(let v=0; v<=I_YMAX; v+=iStep) iTicks.push(v);
+  const gI = xel('g', {class:'grid'});
+  iTicks.forEach(v=>{
+    gI.appendChild(xel('line', {x1:XM.left, x2:XM.left+X_PLOT_W, y1:iYScale(v), y2:iYScale(v)}));
+    const t = xel('text', {x:XM.left-10, y:iYScale(v)+3, 'text-anchor':'end', class:'axis-label'});
+    t.textContent = v;
+    gI.appendChild(t);
+  });
+  xmrSvg.appendChild(gI);
+
+  // MR chart Y grid
+  const mrTicks = [];
+  const mrStep = MR_YMAX <= 50 ? 10 : (MR_YMAX <= 100 ? 20 : 50);
+  for(let v=0; v<=MR_YMAX; v+=mrStep) mrTicks.push(v);
+  const gMR = xel('g', {class:'grid'});
+  mrTicks.forEach(v=>{
+    gMR.appendChild(xel('line', {x1:XM.left, x2:XM.left+X_PLOT_W, y1:mrYScale(v), y2:mrYScale(v)}));
+    const t = xel('text', {x:XM.left-10, y:mrYScale(v)+3, 'text-anchor':'end', class:'axis-label'});
+    t.textContent = v;
+    gMR.appendChild(t);
+  });
+  xmrSvg.appendChild(gMR);
+
+  // Pane headers
+  const iHead = xel('text', {x:XM.left, y:30, class:'xmr-pane-label'});
+  iHead.textContent = 'X — wartości indywidualne';
+  xmrSvg.appendChild(iHead);
+  const iSub = xel('text', {x:XM.left+180, y:30, class:'xmr-pane-sub'});
+  iSub.textContent = 'Cycle Time (dni)';
+  xmrSvg.appendChild(iSub);
+
+  const mrHead = xel('text', {x:XM.left, y:348, class:'xmr-pane-label'});
+  mrHead.textContent = 'MR — ruchomy rozstęp';
+  xmrSvg.appendChild(mrHead);
+  const mrSub = xel('text', {x:XM.left+180, y:348, class:'xmr-pane-sub'});
+  mrSub.textContent = '|Xᵢ − Xᵢ₋₁|';
+  xmrSvg.appendChild(mrSub);
+
+  // X axis (under MR pane)
+  const xAxis = xel('g', {class:'axis'});
+  xAxis.appendChild(xel('line', {x1:XM.left, x2:XM.left+X_PLOT_W, y1:MR_PANE.top+MR_PANE.h, y2:MR_PANE.top+MR_PANE.h}));
+  const start = new Date(xmrTDomain[0]);
+  const end = new Date(xmrTDomain[1]);
+  let cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  while(cur.getTime() <= end.getTime()){
+    const x = xmrXScale(cur.getTime());
+    if(x >= XM.left-2 && x <= XM.left+X_PLOT_W+2){
+      xAxis.appendChild(xel('line', {x1:x, x2:x, y1:MR_PANE.top+MR_PANE.h, y2:MR_PANE.top+MR_PANE.h+5, stroke:'#C7C5BC'}));
+      const label = xel('text', {x:x, y:MR_PANE.top+MR_PANE.h+18, 'text-anchor':'middle', class:'axis-label'});
+      const monthName = PL_MONTHS_SHORT[cur.getMonth()];
+      label.textContent = (cur.getMonth()===0 || cur.getTime()===new Date(start.getFullYear(), start.getMonth(), 1).getTime()) ? `${monthName} ${cur.getFullYear()}` : monthName;
+      if(cur.getMonth()===0){
+        label.setAttribute('font-weight','600');
+        label.setAttribute('fill','#374151');
+      }
+      xAxis.appendChild(label);
+    }
+    cur.setMonth(cur.getMonth()+1);
+  }
+  xmrSvg.appendChild(xAxis);
+
+  // Y axis titles
+  const iTitle = xel('text', {x:-(X_PANE.top+X_PANE.h/2), y:16, transform:'rotate(-90)', 'text-anchor':'middle', class:'axis-title'});
+  iTitle.textContent = 'Cycle Time (dni)';
+  xmrSvg.appendChild(iTitle);
+  const mrTitle = xel('text', {x:-(MR_PANE.top+MR_PANE.h/2), y:16, transform:'rotate(-90)', 'text-anchor':'middle', class:'axis-title'});
+  mrTitle.textContent = 'MR (dni)';
+  xmrSvg.appendChild(mrTitle);
+
+  const xTitle = xel('text', {x:XM.left+X_PLOT_W/2, y:XVB.h-6, 'text-anchor':'middle', class:'axis-title'});
+  xTitle.textContent = 'Data zamknięcia';
+  xmrSvg.appendChild(xTitle);
+}
+
+function addLabel(svg, x, y, text, kind){
+  const w = text.length * 6.2 + 10;
+  svg.appendChild(xel('rect', {class: kind==='limit' ? 'limit-label-bg' : 'cl-label-bg', x, y:y-9, width:w, height:18, rx:3}));
+  const t = xel('text', {class: kind==='limit' ? 'limit-label' : 'cl-label', x:x+w/2, y:y+4, 'text-anchor':'middle'});
+  t.textContent = text;
+  svg.appendChild(t);
+}
+
+function drawXMR(){
+  const s = XMR_STATS;
+  const xR = XM.left + X_PLOT_W;
+
+  // ===== I CHART =====
+  const iG = xel('g');
+
+  // CL + limit lines
+  iG.appendChild(xel('line', {class:'cl-line', x1:XM.left, x2:xR, y1:iYScale(s.xbar), y2:iYScale(s.xbar)}));
+  iG.appendChild(xel('line', {class:'limit-line', x1:XM.left, x2:xR, y1:iYScale(s.ucl_x), y2:iYScale(s.ucl_x)}));
+  iG.appendChild(xel('line', {class:'limit-line', x1:XM.left, x2:xR, y1:iYScale(s.lcl_x), y2:iYScale(s.lcl_x)}));
+
+  // Process polyline
+  const linePts = XMR_DATA.map(d=>`${xmrXScale(d.ts)},${iYScale(d.ct)}`).join(' ');
+  iG.appendChild(xel('polyline', {class:'process-line', points:linePts}));
+
+  // Points
+  XMR_DATA.forEach((d,i)=>{
+    const ooc = d.ct > s.ucl_x || d.ct < s.lcl_x;
+    const c = xel('circle', {
+      cx: xmrXScale(d.ts), cy: iYScale(d.ct), r:5,
+      class: 'xmr-pt' + (ooc ? ' ooc' : ''),
+      'data-pane':'i','data-i':i
+    });
+    iG.appendChild(c);
+  });
+
+  // Labels on right
+  addLabel(iG, xR+4, iYScale(s.ucl_x), `UCL ${s.ucl_x.toFixed(1)}`, 'limit');
+  addLabel(iG, xR+4, iYScale(s.xbar), `X̄ ${s.xbar.toFixed(1)}`, 'cl');
+  if(s.lcl_x_raw < 0){
+    addLabel(iG, xR+4, iYScale(s.lcl_x), `LCL 0*`, 'limit');
+  } else {
+    addLabel(iG, xR+4, iYScale(s.lcl_x), `LCL ${s.lcl_x.toFixed(1)}`, 'limit');
+  }
+
+  xmrSvg.appendChild(iG);
+
+  // ===== MR CHART =====
+  const mG = xel('g');
+
+  mG.appendChild(xel('line', {class:'cl-line', x1:XM.left, x2:xR, y1:mrYScale(s.mrbar), y2:mrYScale(s.mrbar)}));
+  mG.appendChild(xel('line', {class:'limit-line', x1:XM.left, x2:xR, y1:mrYScale(s.ucl_mr), y2:mrYScale(s.ucl_mr)}));
+
+  // MR points are between consecutive X points; assign to date of the later observation
+  const mrPoints = [];
+  for(let i=1;i<XMR_DATA.length;i++){
+    mrPoints.push({ts:XMR_DATA[i].ts, mr:s.mrs[i-1], i, prev:XMR_DATA[i-1], curr:XMR_DATA[i]});
+  }
+  const mrLinePts = mrPoints.map(p=>`${xmrXScale(p.ts)},${mrYScale(p.mr)}`).join(' ');
+  mG.appendChild(xel('polyline', {class:'process-line', points:mrLinePts}));
+
+  mrPoints.forEach((p,idx)=>{
+    const ooc = p.mr > s.ucl_mr;
+    const c = xel('circle', {
+      cx: xmrXScale(p.ts), cy: mrYScale(p.mr), r:5,
+      class: 'xmr-pt' + (ooc ? ' ooc' : ''),
+      'data-pane':'mr','data-i':idx
+    });
+    mG.appendChild(c);
+  });
+
+  addLabel(mG, xR+4, mrYScale(s.ucl_mr), `UCL ${s.ucl_mr.toFixed(1)}`, 'limit');
+  addLabel(mG, xR+4, mrYScale(s.mrbar), `MR̄ ${s.mrbar.toFixed(1)}`, 'cl');
+
+  xmrSvg.appendChild(mG);
+
+  // ===== Tooltips =====
+  const xmrTip = document.getElementById('xmrTooltip');
+  const xmrWrap = document.getElementById('xmrChartWrap');
+
+  function showXMRTip(pane, idx){
+    let html;
+    if(pane === 'i'){
+      const d = XMR_DATA[idx];
+      const ooc = d.ct > s.ucl_x || d.ct < s.lcl_x;
+      const closedFmt = formatPLDate(d.closed);
+      html = `<div class="tt-date">ID #${d.id} · ${closedFmt}</div>
+              <div class="tt-main">${d.ct} dni${ooc ? ' <span class="tt-size l">poza UCL</span>' : ''}</div>`;
+      var pt = {ts:d.ts, val:d.ct, scale:iYScale};
+    } else {
+      const p = mrPoints[idx];
+      const ooc = p.mr > s.ucl_mr;
+      html = `<div class="tt-date">MR · #${p.prev.id} → #${p.curr.id}</div>
+              <div class="tt-main">${p.mr} dni${ooc ? ' <span class="tt-size l">poza UCL</span>' : ''}</div>`;
+      var pt = {ts:p.ts, val:p.mr, scale:mrYScale};
+    }
+    xmrTip.innerHTML = html;
+    xmrTip.hidden = false;
+    const rect = xmrSvg.getBoundingClientRect();
+    const wrapRect = xmrWrap.getBoundingClientRect();
+    const cx = xmrXScale(pt.ts);
+    const cy = pt.scale(pt.val);
+    const px = rect.left + (cx / XVB.w) * rect.width - wrapRect.left;
+    const py = rect.top + (cy / XVB.h) * rect.height - wrapRect.top;
+    xmrTip.style.left = px + 'px';
+    xmrTip.style.top = py + 'px';
+  }
+  function hideXMRTip(){xmrTip.hidden = true}
+
+  xmrSvg.querySelectorAll('circle.xmr-pt').forEach(c=>{
+    c.addEventListener('mouseenter', ()=>showXMRTip(c.dataset.pane, +c.dataset.i));
+    c.addEventListener('mouseleave', hideXMRTip);
+  });
+}
+
+function formatPLDate(iso){
+  const months = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+  const [y,m,d] = iso.split('-').map(Number);
+  return `${d} ${months[m-1]} ${y}`;
+}
+
+function renderXMRStatus(){
+  const s = XMR_STATS;
+  const oocX = XMR_DATA.filter(d => d.ct > s.ucl_x || d.ct < s.lcl_x).length;
+  const oocMR = s.mrs.filter(mr => mr > s.ucl_mr).length;
+  const total = oocX + oocMR;
+  const stable = total === 0;
+  const statusEl = document.getElementById('xmrStatus');
+  statusEl.innerHTML = `
+    <span class="status-pill ${stable ? 'ok' : 'alert'}">${stable ? 'Proces stabilny' : `${total} sygnał${total===1?'':(total<5?'y':'ów')} poza kontrolą`}</span>
+    <p class="status-note">Żaden punkt nie wykracza poza UCL/LCL. Najbliżej granicy: MR=57 (między #17 a #18) wobec UCL_MR=58,8.</p>
+  `;
+  if(!stable){
+    statusEl.querySelector('.status-note').textContent = `Punkty poza limitami w X: ${oocX}, w MR: ${oocMR}. Wymaga analizy przyczyn źródłowych.`;
+  }
+}
+
+function renderXMRStats(){
+  const s = XMR_STATS;
+  const grid = document.getElementById('xmrStats');
+  const cells = [
+    {label:'X̄ (średnia)', value:s.xbar.toFixed(1), unit:'dni', desc:'Środek procesu', cls:'is-cl'},
+    {label:'MR̄ (śr. rozstęp)', value:s.mrbar.toFixed(1), unit:'dni', desc:'Średnia zmienność krótkookresowa', cls:'is-cl'},
+    {label:'UCL_X', value:s.ucl_x.toFixed(1), unit:'dni', desc:'X̄ + 2,66·MR̄', cls:'is-limit'},
+    {label:'LCL_X', value: s.lcl_x_raw < 0 ? '0*' : s.lcl_x.toFixed(1), unit:'dni', desc: s.lcl_x_raw < 0 ? `* obliczone ${s.lcl_x_raw.toFixed(1)}, przycięte do 0` : 'X̄ − 2,66·MR̄', cls:'is-limit'},
+    {label:'UCL_MR', value:s.ucl_mr.toFixed(1), unit:'dni', desc:'3,267·MR̄', cls:'is-limit'},
+  ];
+  grid.innerHTML = cells.map(c=>`
+    <div class="stat-cell ${c.cls||''}">
+      <span class="stat-label">${c.label}</span>
+      <div class="stat-value">${c.value}<span class="unit">${c.unit}</span></div>
+      <p class="stat-desc">${c.desc}</p>
+    </div>
+  `).join('');
+}
+
+// =====================================================
+// Tab switching
+// =====================================================
+const tabs = document.querySelectorAll('.tab');
+const panels = {
+  scatter: document.getElementById('panel-scatter'),
+  xmr: document.getElementById('panel-xmr'),
+};
+let xmrRendered = false;
+
+function activateTab(name){
+  tabs.forEach(t=>{
+    const active = t.dataset.tab === name;
+    t.classList.toggle('is-active', active);
+    t.setAttribute('aria-selected', active ? 'true' : 'false');
+    t.setAttribute('tabindex', active ? '0' : '-1');
+  });
+  Object.entries(panels).forEach(([k, el])=>{
+    if(k === name) el.removeAttribute('hidden');
+    else el.setAttribute('hidden','');
+  });
+  if(name === 'xmr' && !xmrRendered){
+    drawXMRAxes();
+    drawXMR();
+    renderXMRStatus();
+    renderXMRStats();
+    xmrRendered = true;
+  }
+  // hide stray tooltips when switching
+  document.getElementById('tooltip').hidden = true;
+  const xt = document.getElementById('xmrTooltip');
+  if(xt) xt.hidden = true;
+}
+
+tabs.forEach(t => t.addEventListener('click', ()=>activateTab(t.dataset.tab)));
+
+// Keyboard nav (ARIA tablist): left/right arrows
+document.querySelector('[role="tablist"]').addEventListener('keydown', e=>{
+  if(e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  const list = Array.from(tabs);
+  const idx = list.findIndex(t => t.classList.contains('is-active'));
+  const next = e.key === 'ArrowRight' ? (idx+1) % list.length : (idx-1+list.length) % list.length;
+  activateTab(list[next].dataset.tab);
+  list[next].focus();
+});
 
 // --- Init ---
 drawAxes();
