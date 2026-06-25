@@ -1,1 +1,1150 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lead Times — 2024 / 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFBF8;
+    --surface:#FFFFFF;
+    --ink:#0E1116;
+    --muted:#6B7280;
+    --line:#E6E5DE;
+    --line-strong:#1F2937;
+    --c-s:#2563EB;
+    --c-m:#D97706;
+    --c-l:#B91C1C;
+    --c-all:#1F2937;
+    --radius:6px;
+    --shadow:0 1px 2px rgba(14,17,22,.04), 0 0 0 1px var(--line);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .dash{
+    max-width:1100px;
+    margin:0 auto;
+    padding:40px 28px 64px;
+  }
+  header{margin-bottom:28px}
+  .eyebrow{
+    font-family:'JetBrains Mono',ui-monospace,monospace;
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 8px;
+  }
+  h1{
+    font-size:clamp(28px,4vw,40px);
+    font-weight:700;
+    letter-spacing:-0.02em;
+    line-height:1.05;
+    margin:0 0 10px;
+  }
+  .lede{
+    color:var(--muted);
+    max-width:62ch;
+    margin:0;
+    font-size:15px;
+  }
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    margin:28px 0 16px;
+  }
+  .chips-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:.06em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin-right:4px;
+  }
+  .chip{
+    appearance:none;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+    padding:7px 14px;
+    border-radius:999px;
+    font:inherit;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:background .15s,border-color .15s,color .15s;
+  }
+  .chip:hover{border-color:#C7C5BC}
+  .chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .chip .count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    font-weight:500;
+  }
+  .chip.is-active{
+    background:var(--ink);
+    color:#fff;
+    border-color:var(--ink);
+  }
+  .chip.is-active .count{color:rgba(255,255,255,.7)}
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    display:inline-block;
+    flex-shrink:0;
+  }
+  .dot-s{background:var(--c-s)}
+  .dot-m{background:var(--c-m)}
+  .dot-l{background:var(--c-l)}
 
+  .card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .chart-card{
+    padding:24px 20px 16px;
+    position:relative;
+  }
+  .chart-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:12px;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .chart-title{
+    font-size:13px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:-.01em;
+  }
+  .chart-sub{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    margin:0;
+  }
+  .chart-wrap{position:relative;width:100%}
+  svg.chart{display:block;width:100%;height:auto;overflow:visible}
+  .axis-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    fill:var(--muted);
+  }
+  .axis-title{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    fill:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+  }
+  .grid line{stroke:var(--line);stroke-width:1;shape-rendering:crispEdges}
+  .axis line{stroke:#C7C5BC;stroke-width:1;shape-rendering:crispEdges}
+  .pct-line{
+    stroke:var(--line-strong);
+    stroke-width:1;
+    stroke-dasharray:3 3;
+    opacity:.85;
+    transition:transform .35s cubic-bezier(.4,.0,.2,1), opacity .25s;
+  }
+  .pct-label-bg{fill:var(--surface);stroke:var(--line-strong);stroke-width:1}
+  .pct-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:600;
+    fill:var(--ink);
+  }
+  .pt{
+    cursor:pointer;
+    transition:opacity .25s,transform .15s;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  .pt:hover{transform:scale(1.4)}
+  .pt.is-hidden{opacity:.08;pointer-events:none}
+  .pt-s{fill:var(--c-s)}
+  .pt-m{fill:var(--c-m)}
+  .pt-l{fill:var(--c-l)}
+
+  .tooltip{
+    position:absolute;
+    background:var(--ink);
+    color:#fff;
+    padding:8px 10px;
+    border-radius:4px;
+    font-size:12px;
+    line-height:1.45;
+    pointer-events:none;
+    z-index:10;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+    white-space:nowrap;
+    transform:translate(-50%,calc(-100% - 10px));
+  }
+  .tooltip .tt-date{
+    color:rgba(255,255,255,.6);
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+  .tooltip .tt-main{font-weight:600;margin-top:1px}
+  .tooltip .tt-size{
+    display:inline-block;
+    margin-left:6px;
+    padding:1px 6px;
+    border-radius:3px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:500;
+  }
+  .tt-size.s{background:rgba(37,99,235,.25);color:#A5C0FF}
+  .tt-size.m{background:rgba(217,119,6,.25);color:#FFC681}
+  .tt-size.l{background:rgba(185,28,28,.25);color:#FFA8A8}
+
+  .pct-section{
+    margin-top:28px;
+    padding:24px;
+  }
+  .pct-section h2{
+    font-size:13px;
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .pct-section .desc{
+    font-size:12px;
+    color:var(--muted);
+    margin:0 0 18px;
+  }
+  table.pct-table{
+    width:100%;
+    border-collapse:collapse;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+  }
+  table.pct-table th{
+    text-align:right;
+    font-weight:500;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    padding:8px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  table.pct-table th:first-child{text-align:left}
+  table.pct-table td{
+    text-align:right;
+    padding:12px;
+    border-bottom:1px solid var(--line);
+    font-weight:500;
+  }
+  table.pct-table td:first-child{
+    text-align:left;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+  }
+  table.pct-table tr:last-child td{border-bottom:none}
+  table.pct-table tr.row-all td{
+    background:#F5F4EE;
+  }
+  .group-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .group-tag .dot{width:9px;height:9px}
+  .unit{
+    font-size:10px;
+    color:var(--muted);
+    font-weight:400;
+    margin-left:2px;
+  }
+  footer{
+    margin-top:24px;
+    font-size:11px;
+    color:var(--muted);
+    font-family:'JetBrains Mono',monospace;
+    text-align:right;
+    letter-spacing:.03em;
+  }
+
+  /* Tabs */
+  .tabs{
+    display:flex;
+    gap:0;
+    border-bottom:1px solid var(--line);
+    margin:24px 0 28px;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .tab{
+    appearance:none;
+    background:none;
+    border:none;
+    font:inherit;
+    font-size:14px;
+    font-weight:500;
+    color:var(--muted);
+    padding:10px 0;
+    margin-right:28px;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    margin-bottom:-1px;
+    transition:color .15s,border-color .15s;
+    white-space:nowrap;
+    display:inline-flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2px}
+  .tab.is-active{
+    color:var(--ink);
+    border-bottom-color:var(--ink);
+  }
+  .tab .tab-meta{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:500;
+    color:var(--muted);
+    letter-spacing:.04em;
+  }
+  [role="tabpanel"][hidden]{display:none}
+
+  /* XMR chart */
+  .process-line{
+    fill:none;
+    stroke:#1F2937;
+    stroke-width:1.5;
+    stroke-linejoin:round;
+    stroke-linecap:round;
+    opacity:.55;
+  }
+  .cl-line{
+    stroke:#6B7280;
+    stroke-width:1.2;
+    shape-rendering:crispEdges;
+  }
+  .limit-line{
+    stroke:#B91C1C;
+    stroke-width:1;
+    stroke-dasharray:4 3;
+    shape-rendering:crispEdges;
+  }
+  .xmr-pt{
+    fill:#1F2937;
+    stroke:#fff;
+    stroke-width:1.4;
+    cursor:pointer;
+    transition:transform .15s;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  .xmr-pt:hover{transform:scale(1.5)}
+  .xmr-pt.ooc{fill:#B91C1C}
+  .xmr-pane-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    fill:var(--ink);
+    letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+  .xmr-pane-sub{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    fill:var(--muted);
+  }
+  .limit-label-bg{fill:var(--surface);stroke:#B91C1C;stroke-width:1}
+  .limit-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:600;
+    fill:#B91C1C;
+  }
+  .cl-label-bg{fill:var(--surface);stroke:#6B7280;stroke-width:1}
+  .cl-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:600;
+    fill:#374151;
+  }
+
+  /* XMR status & stat cards */
+  .xmr-status{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px 18px;
+    align-items:center;
+    margin:0 0 22px;
+  }
+  .status-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:.02em;
+  }
+  .status-pill::before{
+    content:'';
+    width:6px;height:6px;border-radius:50%;
+    background:currentColor;
+    flex-shrink:0;
+  }
+  .status-pill.ok{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0}
+  .status-pill.alert{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
+  .status-note{
+    font-size:12px;
+    color:var(--muted);
+    margin:0;
+  }
+
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .stat-cell{
+    padding:14px 16px;
+    background:var(--surface);
+  }
+  .stat-cell .stat-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 6px;
+    display:block;
+  }
+  .stat-cell .stat-value{
+    font-family:'JetBrains Mono',monospace;
+    font-size:22px;
+    font-weight:600;
+    color:var(--ink);
+    letter-spacing:-.02em;
+    line-height:1.1;
+  }
+  .stat-cell .stat-value .unit{
+    font-size:12px;
+    font-weight:400;
+    color:var(--muted);
+    margin-left:3px;
+    letter-spacing:0;
+  }
+  .stat-cell .stat-desc{
+    font-size:11px;
+    color:var(--muted);
+    margin:6px 0 0;
+    line-height:1.4;
+  }
+  .stat-cell.is-limit .stat-value{color:#B91C1C}
+  .stat-cell.is-cl .stat-value{color:#374151}
+
+  @media (max-width:600px){
+    .dash{padding:24px 16px 48px}
+    .chart-card{padding:18px 12px 12px}
+    .pct-section{padding:18px}
+    table.pct-table th, table.pct-table td{padding:10px 8px;font-size:12px}
+    .tab{margin-right:20px;font-size:13px}
+    .stat-cell{padding:12px 14px}
+    .stat-cell .stat-value{font-size:18px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition:none !important;animation:none !important}
+  }
+</style>
+</head>
+<body>
+<main class="dash">
+  <header>
+    <p class="eyebrow">Analiza czasu realizacji · 2024 / 2025</p>
+    <h1>Czasy realizacji zadań</h1>
+    <p class="lede">Dwie perspektywy na ten sam temat: rozkład czasów realizacji według rozmiaru oraz karta kontrolna XMR pokazująca stabilność procesu w czasie.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Widoki dashboardu">
+    <button class="tab is-active" role="tab" id="tab-scatter" aria-selected="true" aria-controls="panel-scatter" data-tab="scatter">Scatterplot <span class="tab-meta">36 zadań</span></button>
+    <button class="tab" role="tab" id="tab-xmr" aria-selected="false" aria-controls="panel-xmr" data-tab="xmr" tabindex="-1">XMR <span class="tab-meta">30 obserwacji</span></button>
+  </nav>
+
+  <section role="tabpanel" id="panel-scatter" aria-labelledby="tab-scatter">
+  <div class="controls" role="group" aria-label="Filtr rozmiaru">
+    <span class="chips-label">Filtr</span>
+    <button class="chip is-active" data-filter="ALL">Wszystkie <span class="count">36</span></button>
+    <button class="chip" data-filter="S"><span class="dot dot-s"></span>S <span class="count">13</span></button>
+    <button class="chip" data-filter="M"><span class="dot dot-m"></span>M <span class="count">14</span></button>
+    <button class="chip" data-filter="L"><span class="dot dot-l"></span>L <span class="count">9</span></button>
+  </div>
+
+  <section class="card chart-card">
+    <div class="chart-head">
+      <h2 class="chart-title">Czas realizacji w czasie</h2>
+      <p class="chart-sub" id="chartSub">Wszystkie rozmiary · 36 punktów</p>
+    </div>
+    <div class="chart-wrap" id="chartWrap">
+      <svg class="chart" id="chart" viewBox="0 0 900 480" preserveAspectRatio="xMidYMid meet" aria-label="Wykres punktowy czasu realizacji"></svg>
+      <div class="tooltip" id="tooltip" hidden></div>
+    </div>
+  </section>
+
+  <section class="card pct-section">
+    <h2>Percentyle czasu realizacji</h2>
+    <p class="desc">Wartości w dniach. Percentyle obliczone metodą interpolacji liniowej.</p>
+    <table class="pct-table" id="pctTable">
+      <thead>
+        <tr><th>Grupa</th><th>n</th><th>P50</th><th>P85</th><th>P95</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+  </section><!-- /panel-scatter -->
+
+  <section role="tabpanel" id="panel-xmr" aria-labelledby="tab-xmr" hidden>
+    <section class="card chart-card">
+      <div class="chart-head">
+        <h2 class="chart-title">Karta kontrolna XMR — Cycle Time</h2>
+        <p class="chart-sub">Indywidualne wartości (X) i ruchomy rozstęp (MR) · n=30</p>
+      </div>
+      <div class="chart-wrap" id="xmrChartWrap">
+        <svg class="chart" id="xmrChart" viewBox="0 0 900 620" preserveAspectRatio="xMidYMid meet" aria-label="Karta kontrolna XMR"></svg>
+        <div class="tooltip" id="xmrTooltip" hidden></div>
+      </div>
+    </section>
+
+    <section class="card pct-section">
+      <h2>Parametry karty kontrolnej</h2>
+      <p class="desc">Stałe SPC dla podgrup wielkości n=2 (d<tspan>₂</tspan>≈1,128): UCL/LCL dla X liczone jako X̄ ± 2,66·MR̄; UCL dla MR jako 3,267·MR̄.</p>
+      <div class="xmr-status" id="xmrStatus"></div>
+      <div class="stat-grid" id="xmrStats"></div>
+    </section>
+  </section><!-- /panel-xmr -->
+
+  <footer>Źródła: Lead_Times_2024–25 · Team_Cycle_Time_for_XMR · wygenerowano automatycznie</footer>
+</main>
+
+<script>
+const DATA = [{"date":"2024-07-15","label":"15 Lipca 2024","size":"S","lt":49},{"date":"2024-08-22","label":"22 Sierpnia 2024","size":"S","lt":48},{"date":"2024-09-10","label":"10 Września 2024","size":"S","lt":87},{"date":"2024-09-25","label":"25 Września 2024","size":"M","lt":57},{"date":"2024-10-05","label":"5 Października 2024","size":"M","lt":148},{"date":"2024-10-14","label":"14 Października 2024","size":"S","lt":53},{"date":"2024-10-28","label":"28 Października 2024","size":"S","lt":45},{"date":"2024-11-18","label":"18 Listopada 2024","size":"M","lt":145},{"date":"2024-12-04","label":"4 Grudnia 2024","size":"L","lt":105},{"date":"2025-01-08","label":"8 Stycznia 2025","size":"S","lt":5},{"date":"2025-01-20","label":"20 Stycznia 2025","size":"L","lt":163},{"date":"2025-02-14","label":"14 Lutego 2025","size":"S","lt":43},{"date":"2025-02-26","label":"26 Lutego 2025","size":"M","lt":415},{"date":"2025-03-15","label":"15 Marca 2025","size":"L","lt":123},{"date":"2025-04-10","label":"10 Kwietnia 2025","size":"M","lt":103},{"date":"2025-05-05","label":"5 Maja 2025","size":"L","lt":104},{"date":"2025-06-12","label":"12 Czerwca 2025","size":"L","lt":302},{"date":"2025-06-25","label":"25 Czerwca 2025","size":"L","lt":158},{"date":"2025-07-02","label":"2 Lipca 2025","size":"L","lt":98},{"date":"2025-07-11","label":"11 Lipca 2025","size":"S","lt":52},{"date":"2025-07-18","label":"18 Lipca 2025","size":"M","lt":95},{"date":"2025-07-29","label":"29 Lipca 2025","size":"S","lt":70},{"date":"2025-08-03","label":"3 Sierpnia 2025","size":"M","lt":95},{"date":"2025-08-14","label":"14 Sierpnia 2025","size":"M","lt":101},{"date":"2025-08-21","label":"21 Sierpnia 2025","size":"M","lt":57},{"date":"2025-08-29","label":"29 Sierpnia 2025","size":"M","lt":57},{"date":"2025-09-08","label":"8 Września 2025","size":"S","lt":53},{"date":"2025-09-22","label":"22 Września 2025","size":"L","lt":137},{"date":"2025-10-04","label":"4 Października 2025","size":"S","lt":73},{"date":"2025-10-12","label":"12 Października 2025","size":"M","lt":60},{"date":"2025-10-19","label":"19 Października 2025","size":"S","lt":126},{"date":"2025-10-27","label":"27 Października 2025","size":"M","lt":57},{"date":"2025-11-05","label":"5 Listopada 2025","size":"L","lt":124},{"date":"2025-11-15","label":"15 Listopada 2025","size":"M","lt":75},{"date":"2025-11-25","label":"25 Listopada 2025","size":"M","lt":89},{"date":"2025-12-10","label":"10 Grudnia 2025","size":"S","lt":44}];
+
+const PL_MONTHS_SHORT = ['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz','Paź','Lis','Gru'];
+const COLOR = {S:'#2563EB', M:'#D97706', L:'#B91C1C', ALL:'#1F2937'};
+
+// Parse dates once
+DATA.forEach(d => d.ts = new Date(d.date).getTime());
+
+// --- Percentile (linear interpolation) ---
+function percentile(arr, p){
+  if(!arr.length) return null;
+  const s = [...arr].sort((a,b)=>a-b);
+  const idx = (s.length-1) * p/100;
+  const lo = Math.floor(idx), hi = Math.min(lo+1, s.length-1);
+  return s[lo] + (idx-lo)*(s[hi]-s[lo]);
+}
+
+function statsFor(size){
+  const arr = (size==='ALL' ? DATA : DATA.filter(d=>d.size===size)).map(d=>d.lt);
+  return {
+    n: arr.length,
+    p50: percentile(arr,50),
+    p85: percentile(arr,85),
+    p95: percentile(arr,95),
+  };
+}
+
+// --- Chart geometry ---
+const VB = {w:900, h:480};
+const M = {top:30, right:90, bottom:54, left:60};
+const PLOT = {w:VB.w - M.left - M.right, h:VB.h - M.top - M.bottom};
+
+const tMin = Math.min(...DATA.map(d=>d.ts));
+const tMax = Math.max(...DATA.map(d=>d.ts));
+const tPad = (tMax - tMin) * 0.03;
+const tDomain = [tMin - tPad, tMax + tPad];
+
+const ltMax = Math.max(...DATA.map(d=>d.lt));
+const yMax = Math.ceil(ltMax / 50) * 50;
+const yDomain = [0, yMax];
+
+function xScale(t){
+  return M.left + (t - tDomain[0]) / (tDomain[1] - tDomain[0]) * PLOT.w;
+}
+function yScale(v){
+  return M.top + PLOT.h - (v - yDomain[0]) / (yDomain[1] - yDomain[0]) * PLOT.h;
+}
+
+// --- Render chart skeleton ---
+const svg = document.getElementById('chart');
+const NS = 'http://www.w3.org/2000/svg';
+function el(name, attrs={}){
+  const e = document.createElementNS(NS, name);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+function drawAxes(){
+  // Y gridlines + labels
+  const yTicks = [];
+  const tickStep = yMax <= 200 ? 50 : (yMax <= 500 ? 100 : 200);
+  for(let v=0; v<=yMax; v+=tickStep) yTicks.push(v);
+  const gGrid = el('g', {class:'grid'});
+  yTicks.forEach(v=>{
+    gGrid.appendChild(el('line', {x1:M.left, x2:M.left+PLOT.w, y1:yScale(v), y2:yScale(v)}));
+    const t = el('text', {x:M.left-10, y:yScale(v)+3, 'text-anchor':'end', class:'axis-label'});
+    t.textContent = v;
+    gGrid.appendChild(t);
+  });
+  svg.appendChild(gGrid);
+
+  // X ticks: monthly
+  const xAxis = el('g', {class:'axis'});
+  xAxis.appendChild(el('line', {x1:M.left, x2:M.left+PLOT.w, y1:M.top+PLOT.h, y2:M.top+PLOT.h}));
+
+  // Generate monthly labels
+  const start = new Date(tDomain[0]);
+  const end = new Date(tDomain[1]);
+  const months = [];
+  let cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  while(cur.getTime() <= end.getTime()){
+    months.push(new Date(cur));
+    cur.setMonth(cur.getMonth()+1);
+  }
+  // skip every other if too dense
+  const step = months.length > 10 ? 2 : 1;
+  months.forEach((m, i)=>{
+    if(i % step !== 0) return;
+    const x = xScale(m.getTime());
+    if(x < M.left-2 || x > M.left+PLOT.w+2) return;
+    xAxis.appendChild(el('line', {x1:x, x2:x, y1:M.top+PLOT.h, y2:M.top+PLOT.h+5, stroke:'#C7C5BC'}));
+    const label = el('text', {x:x, y:M.top+PLOT.h+18, 'text-anchor':'middle', class:'axis-label'});
+    const monthName = PL_MONTHS_SHORT[m.getMonth()];
+    label.textContent = m.getMonth()===0 ? `${monthName} ${m.getFullYear()}` : monthName;
+    if(m.getMonth()===0){
+      label.setAttribute('font-weight','600');
+      label.setAttribute('fill','#374151');
+    }
+    xAxis.appendChild(label);
+  });
+  svg.appendChild(xAxis);
+
+  // Axis titles
+  const yTitle = el('text', {
+    x: -(M.top + PLOT.h/2),
+    y: 16,
+    transform:'rotate(-90)',
+    'text-anchor':'middle',
+    class:'axis-title'
+  });
+  yTitle.textContent = 'Czas realizacji (dni)';
+  svg.appendChild(yTitle);
+
+  const xTitle = el('text', {
+    x: M.left + PLOT.w/2,
+    y: VB.h - 6,
+    'text-anchor':'middle',
+    class:'axis-title'
+  });
+  xTitle.textContent = 'Data ukończenia';
+  svg.appendChild(xTitle);
+}
+
+// --- Points ---
+const ptsGroup = el('g', {class:'pts'});
+svg.appendChild(ptsGroup);
+const pointEls = [];
+DATA.forEach((d,i)=>{
+  const cx = xScale(d.ts);
+  const cy = yScale(d.lt);
+  const c = el('circle', {
+    cx, cy, r:5.5,
+    class:`pt pt-${d.size.toLowerCase()}`,
+    'data-i': i,
+    'fill-opacity':'0.78',
+    'stroke':'#fff',
+    'stroke-width':'1.2',
+  });
+  ptsGroup.appendChild(c);
+  pointEls.push(c);
+});
+
+// --- Percentile lines group (rendered last so on top) ---
+const pctGroup = el('g', {class:'pct-lines'});
+svg.appendChild(pctGroup);
+
+function renderPercentileLines(filter){
+  // Clear
+  while(pctGroup.firstChild) pctGroup.removeChild(pctGroup.firstChild);
+  const s = statsFor(filter);
+  if(s.n === 0) return;
+  const labels = [['P50', s.p50],['P85', s.p85],['P95', s.p95]];
+  labels.forEach(([name, v])=>{
+    if(v == null) return;
+    const y = yScale(v);
+    pctGroup.appendChild(el('line', {
+      class:'pct-line',
+      x1:M.left, x2:M.left+PLOT.w, y1:y, y2:y
+    }));
+    // Label on right
+    const labelText = `${name} ${Math.round(v)}d`;
+    const w = labelText.length * 6.2 + 10;
+    const rectX = M.left + PLOT.w + 4;
+    pctGroup.appendChild(el('rect', {
+      class:'pct-label-bg',
+      x:rectX, y:y-9, width:w, height:18, rx:3
+    }));
+    const t = el('text', {
+      class:'pct-label',
+      x: rectX + w/2,
+      y: y + 4,
+      'text-anchor':'middle'
+    });
+    t.textContent = labelText;
+    pctGroup.appendChild(t);
+  });
+}
+
+// --- Tooltip ---
+const tooltip = document.getElementById('tooltip');
+const chartWrap = document.getElementById('chartWrap');
+function showTip(i, evt){
+  const d = DATA[i];
+  const sLower = d.size.toLowerCase();
+  tooltip.innerHTML = `
+    <div class="tt-date">${d.label}</div>
+    <div class="tt-main">${d.lt} dni<span class="tt-size ${sLower}">${d.size}</span></div>
+  `;
+  tooltip.hidden = false;
+  // Position based on point screen coords
+  const rect = svg.getBoundingClientRect();
+  const wrapRect = chartWrap.getBoundingClientRect();
+  const cx = xScale(d.ts), cy = yScale(d.lt);
+  const px = rect.left + (cx / VB.w) * rect.width - wrapRect.left;
+  const py = rect.top + (cy / VB.h) * rect.height - wrapRect.top;
+  tooltip.style.left = px + 'px';
+  tooltip.style.top = py + 'px';
+}
+function hideTip(){tooltip.hidden = true}
+
+pointEls.forEach((c, i)=>{
+  c.addEventListener('mouseenter', e=>showTip(i,e));
+  c.addEventListener('mouseleave', hideTip);
+  c.addEventListener('focus', e=>showTip(i,e));
+  c.addEventListener('blur', hideTip);
+});
+
+// --- Filter chips ---
+let activeFilter = 'ALL';
+const chips = document.querySelectorAll('.chip');
+const chartSub = document.getElementById('chartSub');
+
+function applyFilter(f){
+  activeFilter = f;
+  chips.forEach(c => c.classList.toggle('is-active', c.dataset.filter === f));
+  pointEls.forEach((c,i)=>{
+    const d = DATA[i];
+    if(f === 'ALL' || d.size === f) c.classList.remove('is-hidden');
+    else c.classList.add('is-hidden');
+  });
+  renderPercentileLines(f);
+  const s = statsFor(f);
+  const label = f === 'ALL' ? 'Wszystkie rozmiary' : `Rozmiar ${f}`;
+  chartSub.textContent = `${label} · ${s.n} ${s.n===1?'punkt':(s.n<5?'punkty':'punktów')}`;
+  hideTip();
+}
+
+chips.forEach(c => c.addEventListener('click', ()=>applyFilter(c.dataset.filter)));
+
+// --- Percentile table (always all groups) ---
+function renderTable(){
+  const tbody = document.querySelector('#pctTable tbody');
+  const groups = [
+    {key:'S', label:'S', color:'var(--c-s)'},
+    {key:'M', label:'M', color:'var(--c-m)'},
+    {key:'L', label:'L', color:'var(--c-l)'},
+    {key:'ALL', label:'Wspólne', color:'var(--c-all)'},
+  ];
+  tbody.innerHTML = groups.map(g=>{
+    const s = statsFor(g.key);
+    const dot = g.key === 'ALL' ? '' : `<span class="dot" style="background:${g.color}"></span>`;
+    return `<tr class="${g.key==='ALL'?'row-all':''}">
+      <td><span class="group-tag">${dot}${g.label}</span></td>
+      <td>${s.n}</td>
+      <td>${Math.round(s.p50)}<span class="unit">d</span></td>
+      <td>${Math.round(s.p85)}<span class="unit">d</span></td>
+      <td>${Math.round(s.p95)}<span class="unit">d</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// =====================================================
+// XMR (Individuals / Moving Range) Chart
+// =====================================================
+const XMR_DATA = [{"id":1,"started":"2023-11-28","closed":"2024-01-05","ct":38},{"id":2,"started":"2023-12-20","closed":"2024-01-11","ct":24},{"id":3,"started":"2024-01-02","closed":"2024-01-16","ct":14},{"id":4,"started":"2024-01-10","closed":"2024-01-17","ct":9},{"id":5,"started":"2024-01-18","closed":"2024-01-22","ct":4},{"id":6,"started":"2024-01-03","closed":"2024-01-26","ct":25},{"id":7,"started":"2024-01-10","closed":"2024-01-29","ct":19},{"id":8,"started":"2023-12-19","closed":"2024-02-06","ct":51},{"id":9,"started":"2023-12-26","closed":"2024-02-12","ct":48},{"id":10,"started":"2024-02-02","closed":"2024-02-15","ct":15},{"id":11,"started":"2024-01-26","closed":"2024-02-17","ct":22},{"id":12,"started":"2024-01-09","closed":"2024-02-18","ct":42},{"id":13,"started":"2024-02-02","closed":"2024-02-19","ct":17},{"id":14,"started":"2024-02-16","closed":"2024-02-21","ct":7},{"id":15,"started":"2024-02-23","closed":"2024-02-28","ct":5},{"id":16,"started":"2024-02-20","closed":"2024-03-12","ct":20},{"id":17,"started":"2024-01-12","closed":"2024-03-14","ct":63},{"id":18,"started":"2024-03-13","closed":"2024-03-19","ct":6},{"id":19,"started":"2024-01-25","closed":"2024-03-20","ct":56},{"id":20,"started":"2024-02-28","closed":"2024-03-22","ct":24},{"id":21,"started":"2024-02-28","closed":"2024-03-22","ct":22},{"id":22,"started":"2024-02-06","closed":"2024-03-26","ct":50},{"id":23,"started":"2024-03-21","closed":"2024-03-27","ct":8},{"id":24,"started":"2024-03-26","closed":"2024-03-28","ct":2},{"id":25,"started":"2024-03-28","closed":"2024-03-29","ct":3},{"id":26,"started":"2024-03-22","closed":"2024-03-30","ct":8},{"id":27,"started":"2024-02-26","closed":"2024-04-01","ct":36},{"id":28,"started":"2024-03-06","closed":"2024-04-02","ct":27},{"id":29,"started":"2024-03-13","closed":"2024-04-09","ct":29},{"id":30,"started":"2024-03-20","closed":"2024-04-09","ct":20}];
+
+XMR_DATA.forEach(d => d.ts = new Date(d.closed).getTime());
+
+function computeXMR(data){
+  const xs = data.map(d=>d.ct);
+  const n = xs.length;
+  const xbar = xs.reduce((a,b)=>a+b,0) / n;
+  const mrs = [];
+  for(let i=1;i<n;i++) mrs.push(Math.abs(xs[i]-xs[i-1]));
+  const mrbar = mrs.reduce((a,b)=>a+b,0) / mrs.length;
+  const ucl_x = xbar + 2.66*mrbar;
+  const lcl_x_raw = xbar - 2.66*mrbar;
+  const lcl_x = Math.max(0, lcl_x_raw);
+  const ucl_mr = 3.267*mrbar;
+  return {xs, mrs, xbar, mrbar, ucl_x, lcl_x, lcl_x_raw, ucl_mr, n};
+}
+
+const XMR_STATS = computeXMR(XMR_DATA);
+
+// --- XMR chart geometry ---
+const XVB = {w:900, h:620};
+const XM = {top:44, right:92, bottom:60, left:60};
+const X_PANE = {top:44, h:260};                     // I chart
+const MR_PANE = {top:362, h:160};                   // MR chart
+const X_PLOT_W = XVB.w - XM.left - XM.right;
+
+// Time scale spans both panes
+const xmrTs = XMR_DATA.map(d=>d.ts);
+const xmrTMin = Math.min(...xmrTs);
+const xmrTMax = Math.max(...xmrTs);
+const xmrTPad = (xmrTMax - xmrTMin) * 0.04;
+const xmrTDomain = [xmrTMin - xmrTPad, xmrTMax + xmrTPad];
+
+function xmrXScale(t){
+  return XM.left + (t - xmrTDomain[0]) / (xmrTDomain[1] - xmrTDomain[0]) * X_PLOT_W;
+}
+
+// Y scales per pane
+const I_YMAX = Math.ceil(Math.max(XMR_STATS.ucl_x, Math.max(...XMR_STATS.xs)) * 1.12 / 10) * 10;
+const MR_YMAX = Math.ceil(Math.max(XMR_STATS.ucl_mr, Math.max(...XMR_STATS.mrs)) * 1.12 / 10) * 10;
+
+function iYScale(v){
+  return X_PANE.top + X_PANE.h - (v / I_YMAX) * X_PANE.h;
+}
+function mrYScale(v){
+  return MR_PANE.top + MR_PANE.h - (v / MR_YMAX) * MR_PANE.h;
+}
+
+const xmrSvg = document.getElementById('xmrChart');
+function xel(name, attrs={}){
+  const e = document.createElementNS(NS, name);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+function drawXMRAxes(){
+  // I chart Y grid
+  const iTicks = [];
+  const iStep = I_YMAX <= 50 ? 10 : (I_YMAX <= 100 ? 20 : 50);
+  for(let v=0; v<=I_YMAX; v+=iStep) iTicks.push(v);
+  const gI = xel('g', {class:'grid'});
+  iTicks.forEach(v=>{
+    gI.appendChild(xel('line', {x1:XM.left, x2:XM.left+X_PLOT_W, y1:iYScale(v), y2:iYScale(v)}));
+    const t = xel('text', {x:XM.left-10, y:iYScale(v)+3, 'text-anchor':'end', class:'axis-label'});
+    t.textContent = v;
+    gI.appendChild(t);
+  });
+  xmrSvg.appendChild(gI);
+
+  // MR chart Y grid
+  const mrTicks = [];
+  const mrStep = MR_YMAX <= 50 ? 10 : (MR_YMAX <= 100 ? 20 : 50);
+  for(let v=0; v<=MR_YMAX; v+=mrStep) mrTicks.push(v);
+  const gMR = xel('g', {class:'grid'});
+  mrTicks.forEach(v=>{
+    gMR.appendChild(xel('line', {x1:XM.left, x2:XM.left+X_PLOT_W, y1:mrYScale(v), y2:mrYScale(v)}));
+    const t = xel('text', {x:XM.left-10, y:mrYScale(v)+3, 'text-anchor':'end', class:'axis-label'});
+    t.textContent = v;
+    gMR.appendChild(t);
+  });
+  xmrSvg.appendChild(gMR);
+
+  // Pane headers
+  const iHead = xel('text', {x:XM.left, y:30, class:'xmr-pane-label'});
+  iHead.textContent = 'X — wartości indywidualne';
+  xmrSvg.appendChild(iHead);
+  const iSub = xel('text', {x:XM.left+180, y:30, class:'xmr-pane-sub'});
+  iSub.textContent = 'Cycle Time (dni)';
+  xmrSvg.appendChild(iSub);
+
+  const mrHead = xel('text', {x:XM.left, y:348, class:'xmr-pane-label'});
+  mrHead.textContent = 'MR — ruchomy rozstęp';
+  xmrSvg.appendChild(mrHead);
+  const mrSub = xel('text', {x:XM.left+180, y:348, class:'xmr-pane-sub'});
+  mrSub.textContent = '|Xᵢ − Xᵢ₋₁|';
+  xmrSvg.appendChild(mrSub);
+
+  // X axis (under MR pane)
+  const xAxis = xel('g', {class:'axis'});
+  xAxis.appendChild(xel('line', {x1:XM.left, x2:XM.left+X_PLOT_W, y1:MR_PANE.top+MR_PANE.h, y2:MR_PANE.top+MR_PANE.h}));
+  const start = new Date(xmrTDomain[0]);
+  const end = new Date(xmrTDomain[1]);
+  let cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  while(cur.getTime() <= end.getTime()){
+    const x = xmrXScale(cur.getTime());
+    if(x >= XM.left-2 && x <= XM.left+X_PLOT_W+2){
+      xAxis.appendChild(xel('line', {x1:x, x2:x, y1:MR_PANE.top+MR_PANE.h, y2:MR_PANE.top+MR_PANE.h+5, stroke:'#C7C5BC'}));
+      const label = xel('text', {x:x, y:MR_PANE.top+MR_PANE.h+18, 'text-anchor':'middle', class:'axis-label'});
+      const monthName = PL_MONTHS_SHORT[cur.getMonth()];
+      label.textContent = (cur.getMonth()===0 || cur.getTime()===new Date(start.getFullYear(), start.getMonth(), 1).getTime()) ? `${monthName} ${cur.getFullYear()}` : monthName;
+      if(cur.getMonth()===0){
+        label.setAttribute('font-weight','600');
+        label.setAttribute('fill','#374151');
+      }
+      xAxis.appendChild(label);
+    }
+    cur.setMonth(cur.getMonth()+1);
+  }
+  xmrSvg.appendChild(xAxis);
+
+  // Y axis titles
+  const iTitle = xel('text', {x:-(X_PANE.top+X_PANE.h/2), y:16, transform:'rotate(-90)', 'text-anchor':'middle', class:'axis-title'});
+  iTitle.textContent = 'Cycle Time (dni)';
+  xmrSvg.appendChild(iTitle);
+  const mrTitle = xel('text', {x:-(MR_PANE.top+MR_PANE.h/2), y:16, transform:'rotate(-90)', 'text-anchor':'middle', class:'axis-title'});
+  mrTitle.textContent = 'MR (dni)';
+  xmrSvg.appendChild(mrTitle);
+
+  const xTitle = xel('text', {x:XM.left+X_PLOT_W/2, y:XVB.h-6, 'text-anchor':'middle', class:'axis-title'});
+  xTitle.textContent = 'Data zamknięcia';
+  xmrSvg.appendChild(xTitle);
+}
+
+function addLabel(svg, x, y, text, kind){
+  const w = text.length * 6.2 + 10;
+  svg.appendChild(xel('rect', {class: kind==='limit' ? 'limit-label-bg' : 'cl-label-bg', x, y:y-9, width:w, height:18, rx:3}));
+  const t = xel('text', {class: kind==='limit' ? 'limit-label' : 'cl-label', x:x+w/2, y:y+4, 'text-anchor':'middle'});
+  t.textContent = text;
+  svg.appendChild(t);
+}
+
+function drawXMR(){
+  const s = XMR_STATS;
+  const xR = XM.left + X_PLOT_W;
+
+  // ===== I CHART =====
+  const iG = xel('g');
+
+  // CL + limit lines
+  iG.appendChild(xel('line', {class:'cl-line', x1:XM.left, x2:xR, y1:iYScale(s.xbar), y2:iYScale(s.xbar)}));
+  iG.appendChild(xel('line', {class:'limit-line', x1:XM.left, x2:xR, y1:iYScale(s.ucl_x), y2:iYScale(s.ucl_x)}));
+  iG.appendChild(xel('line', {class:'limit-line', x1:XM.left, x2:xR, y1:iYScale(s.lcl_x), y2:iYScale(s.lcl_x)}));
+
+  // Process polyline
+  const linePts = XMR_DATA.map(d=>`${xmrXScale(d.ts)},${iYScale(d.ct)}`).join(' ');
+  iG.appendChild(xel('polyline', {class:'process-line', points:linePts}));
+
+  // Points
+  XMR_DATA.forEach((d,i)=>{
+    const ooc = d.ct > s.ucl_x || d.ct < s.lcl_x;
+    const c = xel('circle', {
+      cx: xmrXScale(d.ts), cy: iYScale(d.ct), r:5,
+      class: 'xmr-pt' + (ooc ? ' ooc' : ''),
+      'data-pane':'i','data-i':i
+    });
+    iG.appendChild(c);
+  });
+
+  // Labels on right
+  addLabel(iG, xR+4, iYScale(s.ucl_x), `UCL ${s.ucl_x.toFixed(1)}`, 'limit');
+  addLabel(iG, xR+4, iYScale(s.xbar), `X̄ ${s.xbar.toFixed(1)}`, 'cl');
+  if(s.lcl_x_raw < 0){
+    addLabel(iG, xR+4, iYScale(s.lcl_x), `LCL 0*`, 'limit');
+  } else {
+    addLabel(iG, xR+4, iYScale(s.lcl_x), `LCL ${s.lcl_x.toFixed(1)}`, 'limit');
+  }
+
+  xmrSvg.appendChild(iG);
+
+  // ===== MR CHART =====
+  const mG = xel('g');
+
+  mG.appendChild(xel('line', {class:'cl-line', x1:XM.left, x2:xR, y1:mrYScale(s.mrbar), y2:mrYScale(s.mrbar)}));
+  mG.appendChild(xel('line', {class:'limit-line', x1:XM.left, x2:xR, y1:mrYScale(s.ucl_mr), y2:mrYScale(s.ucl_mr)}));
+
+  // MR points are between consecutive X points; assign to date of the later observation
+  const mrPoints = [];
+  for(let i=1;i<XMR_DATA.length;i++){
+    mrPoints.push({ts:XMR_DATA[i].ts, mr:s.mrs[i-1], i, prev:XMR_DATA[i-1], curr:XMR_DATA[i]});
+  }
+  const mrLinePts = mrPoints.map(p=>`${xmrXScale(p.ts)},${mrYScale(p.mr)}`).join(' ');
+  mG.appendChild(xel('polyline', {class:'process-line', points:mrLinePts}));
+
+  mrPoints.forEach((p,idx)=>{
+    const ooc = p.mr > s.ucl_mr;
+    const c = xel('circle', {
+      cx: xmrXScale(p.ts), cy: mrYScale(p.mr), r:5,
+      class: 'xmr-pt' + (ooc ? ' ooc' : ''),
+      'data-pane':'mr','data-i':idx
+    });
+    mG.appendChild(c);
+  });
+
+  addLabel(mG, xR+4, mrYScale(s.ucl_mr), `UCL ${s.ucl_mr.toFixed(1)}`, 'limit');
+  addLabel(mG, xR+4, mrYScale(s.mrbar), `MR̄ ${s.mrbar.toFixed(1)}`, 'cl');
+
+  xmrSvg.appendChild(mG);
+
+  // ===== Tooltips =====
+  const xmrTip = document.getElementById('xmrTooltip');
+  const xmrWrap = document.getElementById('xmrChartWrap');
+
+  function showXMRTip(pane, idx){
+    let html;
+    if(pane === 'i'){
+      const d = XMR_DATA[idx];
+      const ooc = d.ct > s.ucl_x || d.ct < s.lcl_x;
+      const closedFmt = formatPLDate(d.closed);
+      html = `<div class="tt-date">ID #${d.id} · ${closedFmt}</div>
+              <div class="tt-main">${d.ct} dni${ooc ? ' <span class="tt-size l">poza UCL</span>' : ''}</div>`;
+      var pt = {ts:d.ts, val:d.ct, scale:iYScale};
+    } else {
+      const p = mrPoints[idx];
+      const ooc = p.mr > s.ucl_mr;
+      html = `<div class="tt-date">MR · #${p.prev.id} → #${p.curr.id}</div>
+              <div class="tt-main">${p.mr} dni${ooc ? ' <span class="tt-size l">poza UCL</span>' : ''}</div>`;
+      var pt = {ts:p.ts, val:p.mr, scale:mrYScale};
+    }
+    xmrTip.innerHTML = html;
+    xmrTip.hidden = false;
+    const rect = xmrSvg.getBoundingClientRect();
+    const wrapRect = xmrWrap.getBoundingClientRect();
+    const cx = xmrXScale(pt.ts);
+    const cy = pt.scale(pt.val);
+    const px = rect.left + (cx / XVB.w) * rect.width - wrapRect.left;
+    const py = rect.top + (cy / XVB.h) * rect.height - wrapRect.top;
+    xmrTip.style.left = px + 'px';
+    xmrTip.style.top = py + 'px';
+  }
+  function hideXMRTip(){xmrTip.hidden = true}
+
+  xmrSvg.querySelectorAll('circle.xmr-pt').forEach(c=>{
+    c.addEventListener('mouseenter', ()=>showXMRTip(c.dataset.pane, +c.dataset.i));
+    c.addEventListener('mouseleave', hideXMRTip);
+  });
+}
+
+function formatPLDate(iso){
+  const months = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+  const [y,m,d] = iso.split('-').map(Number);
+  return `${d} ${months[m-1]} ${y}`;
+}
+
+function renderXMRStatus(){
+  const s = XMR_STATS;
+  const oocX = XMR_DATA.filter(d => d.ct > s.ucl_x || d.ct < s.lcl_x).length;
+  const oocMR = s.mrs.filter(mr => mr > s.ucl_mr).length;
+  const total = oocX + oocMR;
+  const stable = total === 0;
+  const statusEl = document.getElementById('xmrStatus');
+  statusEl.innerHTML = `
+    <span class="status-pill ${stable ? 'ok' : 'alert'}">${stable ? 'Proces stabilny' : `${total} sygnał${total===1?'':(total<5?'y':'ów')} poza kontrolą`}</span>
+    <p class="status-note">Żaden punkt nie wykracza poza UCL/LCL. Najbliżej granicy: MR=57 (między #17 a #18) wobec UCL_MR=58,8.</p>
+  `;
+  if(!stable){
+    statusEl.querySelector('.status-note').textContent = `Punkty poza limitami w X: ${oocX}, w MR: ${oocMR}. Wymaga analizy przyczyn źródłowych.`;
+  }
+}
+
+function renderXMRStats(){
+  const s = XMR_STATS;
+  const grid = document.getElementById('xmrStats');
+  const cells = [
+    {label:'X̄ (średnia)', value:s.xbar.toFixed(1), unit:'dni', desc:'Środek procesu', cls:'is-cl'},
+    {label:'MR̄ (śr. rozstęp)', value:s.mrbar.toFixed(1), unit:'dni', desc:'Średnia zmienność krótkookresowa', cls:'is-cl'},
+    {label:'UCL_X', value:s.ucl_x.toFixed(1), unit:'dni', desc:'X̄ + 2,66·MR̄', cls:'is-limit'},
+    {label:'LCL_X', value: s.lcl_x_raw < 0 ? '0*' : s.lcl_x.toFixed(1), unit:'dni', desc: s.lcl_x_raw < 0 ? `* obliczone ${s.lcl_x_raw.toFixed(1)}, przycięte do 0` : 'X̄ − 2,66·MR̄', cls:'is-limit'},
+    {label:'UCL_MR', value:s.ucl_mr.toFixed(1), unit:'dni', desc:'3,267·MR̄', cls:'is-limit'},
+  ];
+  grid.innerHTML = cells.map(c=>`
+    <div class="stat-cell ${c.cls||''}">
+      <span class="stat-label">${c.label}</span>
+      <div class="stat-value">${c.value}<span class="unit">${c.unit}</span></div>
+      <p class="stat-desc">${c.desc}</p>
+    </div>
+  `).join('');
+}
+
+// =====================================================
+// Tab switching
+// =====================================================
+const tabs = document.querySelectorAll('.tab');
+const panels = {
+  scatter: document.getElementById('panel-scatter'),
+  xmr: document.getElementById('panel-xmr'),
+};
+let xmrRendered = false;
+
+function activateTab(name){
+  tabs.forEach(t=>{
+    const active = t.dataset.tab === name;
+    t.classList.toggle('is-active', active);
+    t.setAttribute('aria-selected', active ? 'true' : 'false');
+    t.setAttribute('tabindex', active ? '0' : '-1');
+  });
+  Object.entries(panels).forEach(([k, el])=>{
+    if(k === name) el.removeAttribute('hidden');
+    else el.setAttribute('hidden','');
+  });
+  if(name === 'xmr' && !xmrRendered){
+    drawXMRAxes();
+    drawXMR();
+    renderXMRStatus();
+    renderXMRStats();
+    xmrRendered = true;
+  }
+  // hide stray tooltips when switching
+  document.getElementById('tooltip').hidden = true;
+  const xt = document.getElementById('xmrTooltip');
+  if(xt) xt.hidden = true;
+}
+
+tabs.forEach(t => t.addEventListener('click', ()=>activateTab(t.dataset.tab)));
+
+// Keyboard nav (ARIA tablist): left/right arrows
+document.querySelector('[role="tablist"]').addEventListener('keydown', e=>{
+  if(e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  const list = Array.from(tabs);
+  const idx = list.findIndex(t => t.classList.contains('is-active'));
+  const next = e.key === 'ArrowRight' ? (idx+1) % list.length : (idx-1+list.length) % list.length;
+  activateTab(list[next].dataset.tab);
+  list[next].focus();
+});
+
+// --- Init ---
+drawAxes();
+renderPercentileLines('ALL');
+renderTable();
+</script>
+</body>
+</html>
