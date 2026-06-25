@@ -1,1 +1,653 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Throughput XMR — 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFBF8;
+    --surface:#FFFFFF;
+    --ink:#0E1116;
+    --muted:#6B7280;
+    --line:#E6E5DE;
+    --radius:6px;
+    --shadow:0 1px 2px rgba(14,17,22,.04),0 0 0 1px var(--line);
 
+    /* signal colours */
+    --c-strong:#B91C1C;      /* strong: outside UNPL/LNPL */
+    --c-moderate:#D97706;    /* moderate: 2 of 3 beyond 2σ */
+    --c-continuous:#2563EB;  /* continuous: 3 of 5 beyond 1σ */
+    --c-trend:#7C3AED;       /* trend: 5↑ or 8 on one side */
+    --c-normal:#374151;      /* no signal */
+
+    /* limit line colours */
+    --lc-npl:#B91C1C;        /* UNPL / LNPL */
+    --lc-rl:#D97706;         /* URL / LRL */
+    --lc-cl:#6B7280;         /* CL */
+
+    /* zone fill */
+    --zone-outer:rgba(185,28,28,.04);
+    --zone-inner:rgba(217,119,6,.04);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .dash{max-width:1160px;margin:0 auto;padding:40px 28px 72px}
+
+  /* ── Header ── */
+  header{margin-bottom:0}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;font-weight:500;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 8px;
+  }
+  h1{font-size:clamp(26px,3.6vw,38px);font-weight:700;letter-spacing:-.02em;line-height:1.06;margin:0 0 10px}
+  .lede{color:var(--muted);max-width:68ch;margin:0;font-size:14px}
+
+  /* ── Signal legend ── */
+  .legend-bar{
+    display:flex;flex-wrap:wrap;gap:6px 16px;
+    margin:22px 0 28px;
+    align-items:center;
+  }
+  .legend-bar .lb-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--muted);margin-right:4px;
+  }
+  .sig-chip{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:4px 10px;border-radius:999px;
+    font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;
+    white-space:nowrap;cursor:default;
+    border:1px solid transparent;
+  }
+  .sig-chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .sig-chip.strong {background:#FEF2F2;border-color:#FECACA;color:var(--c-strong)}
+  .sig-chip.moderate{background:#FFFBEB;border-color:#FDE68A;color:var(--c-moderate)}
+  .sig-chip.continuous{background:#EFF6FF;border-color:#BFDBFE;color:var(--c-continuous)}
+  .sig-chip.trend{background:#F5F3FF;border-color:#DDD6FE;color:var(--c-trend)}
+  .sig-chip.normal{background:#F9FAFB;border-color:#E5E7EB;color:var(--muted)}
+
+  /* ── Cards ── */
+  .card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px}
+  .chart-card{padding:24px 20px 16px}
+  .chart-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:14px}
+  .chart-title{font-size:13px;font-weight:600;margin:0;letter-spacing:-.01em}
+  .chart-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin:0}
+  .chart-wrap{position:relative;width:100%}
+  svg.chart{display:block;width:100%;height:auto;overflow:visible}
+
+  /* ── SVG styles ── */
+  .axis-label{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--muted)}
+  .axis-title{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .grid-line{stroke:var(--line);stroke-width:1;shape-rendering:crispEdges}
+
+  .process-line{fill:none;stroke:#1F2937;stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round;opacity:.45}
+
+  /* limit lines */
+  .ln-unpl,.ln-lnpl{stroke:var(--lc-npl);stroke-width:1.5;shape-rendering:crispEdges}
+  .ln-url,.ln-lrl  {stroke:var(--lc-rl) ;stroke-width:1  ;stroke-dasharray:5 3;shape-rendering:crispEdges}
+  .ln-cl           {stroke:var(--lc-cl) ;stroke-width:1.2;shape-rendering:crispEdges}
+  .ln-mr-cl        {stroke:var(--lc-cl) ;stroke-width:1.2;shape-rendering:crispEdges}
+  .ln-mr-ucl       {stroke:var(--lc-npl);stroke-width:1.5;shape-rendering:crispEdges}
+
+  /* zone fills */
+  .zone-outer{fill:var(--zone-outer)}
+  .zone-inner{fill:var(--zone-inner)}
+
+  /* data points */
+  .pt{
+    stroke:#fff;stroke-width:1.4;cursor:pointer;
+    transition:transform .15s,r .15s;
+    transform-origin:center;transform-box:fill-box;
+  }
+  .pt:hover{transform:scale(1.55)}
+  .pt.normal    {fill:var(--c-normal)}
+  .pt.strong    {fill:var(--c-strong)}
+  .pt.moderate  {fill:var(--c-moderate)}
+  .pt.continuous{fill:var(--c-continuous)}
+  .pt.trend     {fill:var(--c-trend)}
+
+  /* limit labels */
+  .ll-bg-npl{fill:var(--surface);stroke:var(--lc-npl);stroke-width:1}
+  .ll-bg-rl {fill:var(--surface);stroke:var(--lc-rl) ;stroke-width:1}
+  .ll-bg-cl {fill:var(--surface);stroke:var(--lc-cl) ;stroke-width:1}
+  .ll-npl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;fill:var(--lc-npl)}
+  .ll-rl {font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;fill:var(--lc-rl)}
+  .ll-cl {font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;fill:var(--lc-cl)}
+  .pane-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;fill:var(--ink);letter-spacing:.06em;text-transform:uppercase}
+  .pane-sub  {font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--muted)}
+
+  /* ── Tooltip ── */
+  .tooltip{
+    position:absolute;background:var(--ink);color:#fff;
+    padding:9px 11px;border-radius:4px;font-size:12px;line-height:1.45;
+    pointer-events:none;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.18);
+    white-space:nowrap;transform:translate(-50%,calc(-100% - 12px));
+    min-width:180px;
+  }
+  .tt-date{color:rgba(255,255,255,.55);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase}
+  .tt-main{font-weight:600;margin-top:2px;font-size:13px}
+  .tt-sigs{margin-top:5px;display:flex;flex-direction:column;gap:3px}
+  .tt-sig{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:500;
+    padding:2px 6px;border-radius:3px;
+  }
+  .tt-sig.strong    {background:rgba(185,28,28,.3);color:#FCA5A5}
+  .tt-sig.moderate  {background:rgba(217,119,6,.3);color:#FCD34D}
+  .tt-sig.continuous{background:rgba(37,99,235,.3);color:#93C5FD}
+  .tt-sig.trend     {background:rgba(124,58,237,.3);color:#C4B5FD}
+
+  /* ── Signal summary cards ── */
+  .signal-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+    margin-top:20px;
+  }
+  .sig-stat{padding:16px 18px;background:var(--surface)}
+  .sig-stat .ss-label{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 6px;display:block;
+  }
+  .sig-stat .ss-count{
+    font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;
+    line-height:1.1;letter-spacing:-.02em;color:var(--ink);
+  }
+  .sig-stat .ss-count.has-signal{color:var(--c-strong)}
+  .sig-stat .ss-desc{font-size:11px;color:var(--muted);margin:6px 0 0;line-height:1.4}
+  .sig-stat .ss-colour{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    margin-right:5px;vertical-align:middle;
+  }
+
+  /* ── Stats panel ── */
+  .stats-section{padding:24px}
+  .stats-section h2{font-size:13px;font-weight:600;margin:0 0 4px}
+  .stats-section .desc{font-size:12px;color:var(--muted);margin:0 0 18px}
+  .param-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  }
+  .param-cell{padding:12px 14px;background:var(--surface)}
+  .param-cell .pc-label{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.07em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 5px;display:block;
+  }
+  .param-cell .pc-val{
+    font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;
+    letter-spacing:-.02em;line-height:1.1;
+  }
+  .pc-val.npl{color:var(--c-strong)}
+  .pc-val.rl {color:var(--c-moderate)}
+  .pc-val.cl {color:var(--muted)}
+  .param-cell .pc-formula{font-size:10px;color:var(--muted);margin:4px 0 0}
+
+  footer{margin-top:24px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:right;letter-spacing:.03em}
+
+  @media(max-width:600px){
+    .dash{padding:24px 16px 48px}
+    .chart-card{padding:16px 10px 10px}
+    .stats-section,.sig-stat,.param-cell{padding:12px 14px}
+    .ss-count{font-size:22px}
+    .pc-val{font-size:17px}
+    .legend-bar{gap:5px 12px}
+  }
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="dash">
+  <header>
+    <p class="eyebrow">Throughput XMR · Styczeń — Kwiecień 2025 · n=103</p>
+    <h1>Tempo dostarczania</h1>
+    <p class="lede">Karta kontrolna XMR dla dziennego przepustowości zespołu z pełną sygnalizacją SPC: strefy ostrzegawcze (URL/LRL), limity naturalne (UNPL/LNPL) i cztery reguły wykrywania sygnałów.</p>
+  </header>
+
+  <div class="legend-bar">
+    <span class="lb-label">Sygnały</span>
+    <span class="sig-chip strong"><span class="dot" style="background:var(--c-strong)"></span>Silny — poza UNPL/LNPL</span>
+    <span class="sig-chip moderate"><span class="dot" style="background:var(--c-moderate)"></span>Umiarkowany — 2 z 3 poza URL</span>
+    <span class="sig-chip continuous"><span class="dot" style="background:var(--c-continuous)"></span>Ciągły — 3 z 5 poza 1σ</span>
+    <span class="sig-chip trend"><span class="dot" style="background:var(--c-trend)"></span>Trend — 5↑↓ lub 8 po 1 stronie</span>
+  </div>
+
+  <!-- X (Individuals) chart -->
+  <section class="card chart-card">
+    <div class="chart-head">
+      <h2 class="chart-title">X — Dzienne tempo dostarczania (Individuals)</h2>
+      <p class="chart-sub" id="xSub"></p>
+    </div>
+    <div class="chart-wrap" id="xWrap">
+      <svg class="chart" id="xChart" viewBox="0 0 1060 420" preserveAspectRatio="xMidYMid meet" aria-label="Wykres Individuals"></svg>
+      <div class="tooltip" id="xTooltip" hidden></div>
+    </div>
+  </section>
+
+  <!-- MR chart -->
+  <section class="card chart-card">
+    <div class="chart-head">
+      <h2 class="chart-title">MR — Ruchomy rozstęp</h2>
+      <p class="chart-sub">|TPᵢ − TPᵢ₋₁| · UCL<sub>MR</sub> = 3,267 · MR̄</p>
+    </div>
+    <div class="chart-wrap" id="mrWrap">
+      <svg class="chart" id="mrChart" viewBox="0 0 1060 260" preserveAspectRatio="xMidYMid meet" aria-label="Wykres MR"></svg>
+      <div class="tooltip" id="mrTooltip" hidden></div>
+    </div>
+  </section>
+
+  <!-- Signal summary -->
+  <section class="card chart-card">
+    <div class="chart-head">
+      <h2 class="chart-title">Podsumowanie sygnałów</h2>
+      <p class="chart-sub">Liczba punktów z przynajmniej jednym aktywnym sygnałem SPC</p>
+    </div>
+    <div class="signal-grid" id="signalGrid"></div>
+  </section>
+
+  <!-- Parameters -->
+  <section class="card stats-section">
+    <h2>Parametry karty kontrolnej</h2>
+    <p class="desc">MR̄ = średnia ruchomego rozstępu (n=2); σ̂ = MR̄ / 1,128. Strefy: ±1σ (ciągły), ±2σ (URL/LRL), ±3σ (UNPL/LNPL).</p>
+    <div class="param-grid" id="paramGrid"></div>
+  </section>
+
+  <footer>Źródło: Throughput_Daily_2025 · obliczenia SPC wg Wheeler / Shewhart</footer>
+</main>
+
+<script>
+// ── Raw data ────────────────────────────────────────────────────────────────
+const RAW = [{"date":"2025-01-07","tp":0},{"date":"2025-01-08","tp":2},{"date":"2025-01-09","tp":10},{"date":"2025-01-10","tp":3},{"date":"2025-01-11","tp":0},{"date":"2025-01-12","tp":0},{"date":"2025-01-13","tp":2},{"date":"2025-01-14","tp":3},{"date":"2025-01-15","tp":7},{"date":"2025-01-16","tp":0},{"date":"2025-01-17","tp":0},{"date":"2025-01-18","tp":0},{"date":"2025-01-19","tp":0},{"date":"2025-01-20","tp":5},{"date":"2025-01-21","tp":2},{"date":"2025-01-22","tp":0},{"date":"2025-01-23","tp":0},{"date":"2025-01-24","tp":0},{"date":"2025-01-25","tp":0},{"date":"2025-01-26","tp":0},{"date":"2025-01-27","tp":1},{"date":"2025-01-28","tp":1},{"date":"2025-01-29","tp":0},{"date":"2025-01-30","tp":5},{"date":"2025-01-31","tp":4},{"date":"2025-02-01","tp":0},{"date":"2025-02-02","tp":0},{"date":"2025-02-03","tp":7},{"date":"2025-02-04","tp":0},{"date":"2025-02-05","tp":2},{"date":"2025-02-06","tp":2},{"date":"2025-02-07","tp":12},{"date":"2025-02-08","tp":0},{"date":"2025-02-09","tp":0},{"date":"2025-02-10","tp":1},{"date":"2025-02-11","tp":0},{"date":"2025-02-12","tp":0},{"date":"2025-02-13","tp":2},{"date":"2025-02-14","tp":12},{"date":"2025-02-15","tp":0},{"date":"2025-02-16","tp":0},{"date":"2025-02-17","tp":1},{"date":"2025-02-18","tp":0},{"date":"2025-02-19","tp":0},{"date":"2025-02-20","tp":3},{"date":"2025-02-21","tp":11},{"date":"2025-02-22","tp":0},{"date":"2025-02-23","tp":0},{"date":"2025-02-24","tp":6},{"date":"2025-02-25","tp":0},{"date":"2025-02-26","tp":0},{"date":"2025-02-27","tp":6},{"date":"2025-02-28","tp":7},{"date":"2025-03-01","tp":0},{"date":"2025-03-02","tp":0},{"date":"2025-03-03","tp":2},{"date":"2025-03-04","tp":0},{"date":"2025-03-05","tp":0},{"date":"2025-03-06","tp":3},{"date":"2025-03-07","tp":5},{"date":"2025-03-08","tp":0},{"date":"2025-03-09","tp":0},{"date":"2025-03-10","tp":1},{"date":"2025-03-11","tp":0},{"date":"2025-03-12","tp":0},{"date":"2025-03-13","tp":9},{"date":"2025-03-14","tp":7},{"date":"2025-03-15","tp":0},{"date":"2025-03-16","tp":0},{"date":"2025-03-17","tp":3},{"date":"2025-03-18","tp":0},{"date":"2025-03-19","tp":0},{"date":"2025-03-20","tp":4},{"date":"2025-03-21","tp":10},{"date":"2025-03-22","tp":0},{"date":"2025-03-23","tp":0},{"date":"2025-03-24","tp":1},{"date":"2025-03-25","tp":0},{"date":"2025-03-26","tp":0},{"date":"2025-03-27","tp":5},{"date":"2025-03-28","tp":1},{"date":"2025-03-29","tp":0},{"date":"2025-03-30","tp":0},{"date":"2025-03-31","tp":2},{"date":"2025-04-01","tp":0},{"date":"2025-04-02","tp":0},{"date":"2025-04-03","tp":2},{"date":"2025-04-04","tp":11},{"date":"2025-04-05","tp":0},{"date":"2025-04-06","tp":0},{"date":"2025-04-07","tp":1},{"date":"2025-04-08","tp":0},{"date":"2025-04-09","tp":0},{"date":"2025-04-10","tp":5},{"date":"2025-04-11","tp":2},{"date":"2025-04-12","tp":0},{"date":"2025-04-13","tp":0},{"date":"2025-04-14","tp":1},{"date":"2025-04-15","tp":0},{"date":"2025-04-16","tp":0},{"date":"2025-04-17","tp":4},{"date":"2025-04-18","tp":7},{"date":"2025-04-19","tp":0}];
+
+// ── SPC constants ────────────────────────────────────────────────────────────
+const n = RAW.length;
+const xs = RAW.map(d => d.tp);
+const xbar  = xs.reduce((a,b)=>a+b,0) / n;
+const mrs   = xs.slice(1).map((v,i) => Math.abs(v - xs[i]));
+const mrbar = mrs.reduce((a,b)=>a+b,0) / mrs.length;
+const sigma = mrbar / 1.128;
+
+const UNPL = xbar + 3 * sigma;   // = xbar + 2.66*mrbar
+const LNPL = Math.max(0, xbar - 3 * sigma);
+const URL  = xbar + 2 * sigma;   // ±2σ zone boundary
+const LRL  = Math.max(0, xbar - 2 * sigma);
+const S1U  = xbar + sigma;       // +1σ
+const S1L  = Math.max(0, xbar - sigma); // -1σ
+const UCL_MR = 3.267 * mrbar;
+
+// ── Signal detection ─────────────────────────────────────────────────────────
+// Returns object with signal flags for each data index
+function detectSignals(vals, cl, unpl, lnpl, url, lrl, s1u, s1l) {
+  const n = vals.length;
+  const sigs = Array.from({length: n}, ()=>({strong:false, moderate:false, continuous:false, trend:false}));
+
+  for (let i = 0; i < n; i++) {
+    const v = vals[i];
+
+    // 1. STRONG: point beyond UNPL or below LNPL
+    if (v > unpl || v < lnpl) sigs[i].strong = true;
+
+    // 2. MODERATE: 2 of any 3 consecutive points beyond ±2σ (URL/LRL)
+    //    Check windows centred on i: windows [i-2,i-1,i], [i-1,i,i+1], [i,i+1,i+2]
+    for (let start = Math.max(0, i-2); start <= Math.min(n-3, i); start++) {
+      const w = [vals[start], vals[start+1], vals[start+2]];
+      const beyondAbove = w.filter(x => x > url).length;
+      const beyondBelow = w.filter(x => x < lrl).length;
+      if (beyondAbove >= 2 || beyondBelow >= 2) {
+        // tag each point in this window that is actually beyond the line
+        for (let k = start; k <= start+2; k++) {
+          if (vals[k] > url || vals[k] < lrl) sigs[k].moderate = true;
+        }
+      }
+    }
+
+    // 3. CONTINUOUS: 3 of any 5 consecutive points beyond ±1σ (same side)
+    for (let start = Math.max(0, i-4); start <= Math.min(n-5, i); start++) {
+      const w5 = [vals[start],vals[start+1],vals[start+2],vals[start+3],vals[start+4]];
+      const aboveSigma = w5.filter(x => x > s1u).length;
+      const belowSigma = w5.filter(x => x < s1l).length;
+      if (aboveSigma >= 3 || belowSigma >= 3) {
+        for (let k = start; k <= start+4; k++) {
+          if (vals[k] > s1u || vals[k] < s1l) sigs[k].continuous = true;
+        }
+      }
+    }
+  }
+
+  // 4a. TREND: 5 consecutive points monotonically increasing or decreasing
+  for (let i = 0; i <= n-5; i++) {
+    const w = [vals[i],vals[i+1],vals[i+2],vals[i+3],vals[i+4]];
+    let up = true, down = true;
+    for (let k = 1; k < 5; k++) { if (w[k] <= w[k-1]) up = false; if (w[k] >= w[k-1]) down = false; }
+    if (up || down) for (let k = i; k < i+5; k++) sigs[k].trend = true;
+  }
+
+  // 4b. TREND: 8 consecutive points on the same side of the mean
+  for (let i = 0; i <= n-8; i++) {
+    const w = vals.slice(i, i+8);
+    const allAbove = w.every(x => x > cl);
+    const allBelow = w.every(x => x < cl);
+    if (allAbove || allBelow) for (let k = i; k < i+8; k++) sigs[k].trend = true;
+  }
+
+  return sigs;
+}
+
+const SIGS = detectSignals(xs, xbar, UNPL, LNPL, URL, LRL, S1U, S1L);
+
+// Priority for colour (strongest wins)
+function sigClass(s) {
+  if (s.strong)     return 'strong';
+  if (s.moderate)   return 'moderate';
+  if (s.continuous) return 'continuous';
+  if (s.trend)      return 'trend';
+  return 'normal';
+}
+
+// ── Date helpers ─────────────────────────────────────────────────────────────
+const PL_M = ['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz','Paź','Lis','Gru'];
+const PL_MF = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+function fmtShort(iso){ const [,m,d]=iso.split('-').map(Number); return `${d} ${PL_M[m-1]}`; }
+function fmtLong(iso){ const [y,m,d]=iso.split('-').map(Number); return `${d} ${PL_MF[m-1]} ${y}`; }
+function isoToTs(iso){ return new Date(iso).getTime(); }
+
+const TS = RAW.map(d => isoToTs(d.date));
+const tMin = Math.min(...TS), tMax = Math.max(...TS);
+const tPad = (tMax - tMin) * 0.015;
+const T0 = tMin - tPad, T1 = tMax + tPad;
+
+// ── SVG helpers ──────────────────────────────────────────────────────────────
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs={}, text=''){
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text) e.textContent = text;
+  return e;
+}
+function labelBox(parent, x, y, text, bgClass, textClass){
+  const w = text.length * 6.0 + 10;
+  parent.appendChild(el('rect', {class: bgClass, x, y: y-9, width: w, height: 18, rx: 3}));
+  const t = el('text', {class: textClass, x: x+w/2, y: y+4, 'text-anchor':'middle'}, text);
+  parent.appendChild(t);
+}
+
+// ── X Chart ──────────────────────────────────────────────────────────────────
+(function buildXChart(){
+  const VW=1060, VH=420;
+  const M={t:38, r:100, b:52, l:52};
+  const PW = VW-M.l-M.r, PH = VH-M.t-M.b;
+  const yMax = Math.ceil(Math.max(UNPL*1.05, 13) / 2)*2;
+
+  function xsc(t){ return M.l + (t-T0)/(T1-T0)*PW; }
+  function ysc(v){ return M.t + PH - (v/yMax)*PH; }
+
+  const svg = document.getElementById('xChart');
+
+  // ── Zone fills ──
+  // Outer zone: URL to UNPL
+  if (URL < UNPL) {
+    svg.appendChild(el('rect', {class:'zone-outer', x:M.l, y:ysc(UNPL), width:PW, height:ysc(URL)-ysc(UNPL)}));
+  }
+  // Inner zone: S1U to URL
+  if (S1U < URL) {
+    svg.appendChild(el('rect', {class:'zone-inner', x:M.l, y:ysc(URL), width:PW, height:ysc(S1U)-ysc(URL)}));
+  }
+
+  // ── Y grid ──
+  const yStep = yMax <= 14 ? 2 : (yMax <= 20 ? 4 : 5);
+  for (let v=0; v<=yMax; v+=yStep){
+    svg.appendChild(el('line', {class:'grid-line', x1:M.l, x2:M.l+PW, y1:ysc(v), y2:ysc(v)}));
+    svg.appendChild(el('text', {class:'axis-label', x:M.l-8, y:ysc(v)+3, 'text-anchor':'end'}, String(v)));
+  }
+
+  // ── Limit lines ──
+  function hline(cls, val){
+    if (val < 0 || val > yMax) return;
+    svg.appendChild(el('line', {class:cls, x1:M.l, x2:M.l+PW, y1:ysc(val), y2:ysc(val)}));
+  }
+  hline('ln-unpl', UNPL);
+  hline('ln-url',  URL);
+  hline('ln-cl',   xbar);
+  if (LRL > 0) hline('ln-lrl', LRL);
+  if (LNPL > 0) hline('ln-lnpl', LNPL);
+
+  // ── Process polyline ──
+  const pts = RAW.map((d,i)=>`${xsc(TS[i])},${ysc(d.tp)}`).join(' ');
+  svg.appendChild(el('polyline', {class:'process-line', points:pts}));
+
+  // ── Data points ──
+  const ptEls = [];
+  RAW.forEach((d,i)=>{
+    const c = el('circle', {
+      cx: xsc(TS[i]), cy: ysc(d.tp), r: 4.5,
+      class: 'pt ' + sigClass(SIGS[i]),
+      'data-i': i
+    });
+    svg.appendChild(c);
+    ptEls.push(c);
+  });
+
+  // ── X axis labels ──
+  // Monthly ticks
+  const start = new Date(T0), end = new Date(T1);
+  let cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (cur <= end){
+    const x = xsc(cur.getTime());
+    if (x >= M.l && x <= M.l+PW){
+      svg.appendChild(el('line', {stroke:'#C7C5BC', 'stroke-width':1, x1:x, x2:x, y1:M.t+PH, y2:M.t+PH+5}));
+      const lbl = el('text', {class:'axis-label', x, y:M.t+PH+18, 'text-anchor':'middle'});
+      lbl.textContent = PL_M[cur.getMonth()] + ' ' + cur.getFullYear();
+      svg.appendChild(lbl);
+    }
+    cur.setMonth(cur.getMonth()+1);
+  }
+
+  // ── Right-side labels ──
+  const rX = M.l + PW + 4;
+  labelBox(svg, rX, ysc(UNPL), `UNPL ${UNPL.toFixed(1)}`, 'll-bg-npl', 'll-npl');
+  labelBox(svg, rX, ysc(URL),  `URL ${URL.toFixed(1)}`,   'll-bg-rl',  'll-rl');
+  labelBox(svg, rX, ysc(xbar), `X̄ ${xbar.toFixed(2)}`,   'll-bg-cl',  'll-cl');
+  if (LRL > 0.2) labelBox(svg, rX, ysc(LRL), `LRL ${LRL.toFixed(1)}`, 'll-bg-rl', 'll-rl');
+  else {
+    // note at bottom that LRL≈0
+    svg.appendChild(el('text', {class:'axis-label', x:rX+2, y:ysc(0)-2, 'text-anchor':'start', 'fill':'var(--lc-rl)'}, 'LRL≈0'));
+  }
+  if (LNPL > 0.2) labelBox(svg, rX, ysc(LNPL), `LNPL ${LNPL.toFixed(1)}`, 'll-bg-npl', 'll-npl');
+  else svg.appendChild(el('text', {class:'axis-label', x:rX+2, y:ysc(0)+12, 'text-anchor':'start', fill:'var(--lc-npl)'}, 'LNPL≈0'));
+
+  // Y axis title
+  const yt = el('text', {x:-(M.t+PH/2), y:14, transform:'rotate(-90)', 'text-anchor':'middle', class:'axis-title'});
+  yt.textContent = 'Przepustowość (szt/dzień)';
+  svg.appendChild(yt);
+
+  // X axis title
+  const xt = el('text', {x:M.l+PW/2, y:VH-4, 'text-anchor':'middle', class:'axis-title'});
+  xt.textContent = 'Data';
+  svg.appendChild(xt);
+
+  // ── Tooltip ──
+  const tip = document.getElementById('xTooltip');
+  const wrap = document.getElementById('xWrap');
+  function show(i){
+    const d = RAW[i];
+    const s = SIGS[i];
+    const bgs = [];
+    if (s.strong)     bgs.push('<span class="tt-sig strong">● Silny — poza UNPL</span>');
+    if (s.moderate)   bgs.push('<span class="tt-sig moderate">● Umiarkowany — 2 z 3 poza URL</span>');
+    if (s.continuous) bgs.push('<span class="tt-sig continuous">● Ciągły — 3 z 5 poza 1σ</span>');
+    if (s.trend)      bgs.push('<span class="tt-sig trend">● Trend — 5↑↓ lub 8/strona</span>');
+    tip.innerHTML = `<div class="tt-date">${fmtLong(d.date)}</div>
+      <div class="tt-main">${d.tp} szt/dzień</div>
+      ${bgs.length ? '<div class="tt-sigs">'+bgs.join('')+'</div>' : ''}`;
+    tip.hidden = false;
+    const sr = svg.getBoundingClientRect(), wr = wrap.getBoundingClientRect();
+    tip.style.left = (sr.left + (xsc(TS[i])/VW)*sr.width - wr.left) + 'px';
+    tip.style.top  = (sr.top  + (ysc(d.tp)/VH)*sr.height - wr.top) + 'px';
+  }
+  ptEls.forEach((c,i)=>{
+    c.addEventListener('mouseenter',()=>show(i));
+    c.addEventListener('mouseleave',()=>{tip.hidden=true});
+  });
+
+  // Subtitle
+  const strongCount = SIGS.filter(s=>s.strong).length;
+  document.getElementById('xSub').textContent =
+    `X̄=${xbar.toFixed(2)} · UNPL=${UNPL.toFixed(1)} · ${strongCount} punkt${strongCount===1?'':'ów'} poza UNPL`;
+})();
+
+// ── MR Chart ─────────────────────────────────────────────────────────────────
+(function buildMRChart(){
+  const VW=1060, VH=260;
+  const M={t:24, r:100, b:52, l:52};
+  const PW=VW-M.l-M.r, PH=VH-M.t-M.b;
+  const mrMax = Math.ceil(Math.max(UCL_MR*1.1, Math.max(...mrs)) / 2)*2;
+
+  function xsc(t){ return M.l + (t-T0)/(T1-T0)*PW; }
+  function ysc(v){ return M.t + PH - (v/mrMax)*PH; }
+
+  const svg = document.getElementById('mrChart');
+
+  // Y grid
+  const yStep = mrMax <= 10 ? 2 : (mrMax <= 20 ? 5 : 10);
+  for (let v=0; v<=mrMax; v+=yStep){
+    svg.appendChild(el('line', {class:'grid-line', x1:M.l, x2:M.l+PW, y1:ysc(v), y2:ysc(v)}));
+    svg.appendChild(el('text', {class:'axis-label', x:M.l-8, y:ysc(v)+3, 'text-anchor':'end'}, String(v)));
+  }
+
+  svg.appendChild(el('line', {class:'ln-mr-ucl', x1:M.l, x2:M.l+PW, y1:ysc(UCL_MR), y2:ysc(UCL_MR)}));
+  svg.appendChild(el('line', {class:'ln-mr-cl',  x1:M.l, x2:M.l+PW, y1:ysc(mrbar),  y2:ysc(mrbar)}));
+
+  // Polyline — MR is indexed 1..n-1, plotted at the later date
+  const mrPts = mrs.map((mr,i)=>`${xsc(TS[i+1])},${ysc(mr)}`).join(' ');
+  svg.appendChild(el('polyline', {class:'process-line', points:mrPts}));
+
+  // Points
+  const ptEls = [];
+  mrs.forEach((mr, i)=>{
+    const ooc = mr > UCL_MR;
+    const c = el('circle', {
+      cx: xsc(TS[i+1]), cy: ysc(mr), r: 4,
+      class: 'pt ' + (ooc ? 'strong' : 'normal'),
+      'data-i': i
+    });
+    svg.appendChild(c);
+    ptEls.push(c);
+  });
+
+  // X axis
+  const start = new Date(T0), end = new Date(T1);
+  let cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (cur <= end){
+    const x = xsc(cur.getTime());
+    if (x >= M.l && x <= M.l+PW){
+      svg.appendChild(el('line', {stroke:'#C7C5BC','stroke-width':1, x1:x, x2:x, y1:M.t+PH, y2:M.t+PH+5}));
+      const lbl = el('text', {class:'axis-label', x, y:M.t+PH+18, 'text-anchor':'middle'});
+      lbl.textContent = PL_M[cur.getMonth()] + ' ' + cur.getFullYear();
+      svg.appendChild(lbl);
+    }
+    cur.setMonth(cur.getMonth()+1);
+  }
+
+  // Labels right
+  const rX = M.l+PW+4;
+  labelBox(svg, rX, ysc(UCL_MR), `UCL ${UCL_MR.toFixed(1)}`, 'll-bg-npl', 'll-npl');
+  labelBox(svg, rX, ysc(mrbar),  `MR̄ ${mrbar.toFixed(2)}`,  'll-bg-cl',  'll-cl');
+
+  // Y title
+  const yt = el('text', {x:-(M.t+PH/2), y:14, transform:'rotate(-90)', 'text-anchor':'middle', class:'axis-title'});
+  yt.textContent = 'MR (szt)';
+  svg.appendChild(yt);
+  const xt = el('text', {x:M.l+PW/2, y:VH-4, 'text-anchor':'middle', class:'axis-title'});
+  xt.textContent = 'Data';
+  svg.appendChild(xt);
+
+  // Tooltip
+  const tip = document.getElementById('mrTooltip');
+  const wrap = document.getElementById('mrWrap');
+  ptEls.forEach((c,i)=>{
+    c.addEventListener('mouseenter',()=>{
+      tip.innerHTML = `<div class="tt-date">${fmtLong(RAW[i+1].date)}</div>
+        <div class="tt-main">MR = ${mrs[i]} szt</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:3px;font-family:monospace">
+          |${RAW[i+1].tp} − ${RAW[i].tp}| = ${mrs[i]}${mrs[i]>UCL_MR?' · <span style="color:#FCA5A5;font-weight:600">poza UCL</span>':''}
+        </div>`;
+      tip.hidden = false;
+      const sr = svg.getBoundingClientRect(), wr = wrap.getBoundingClientRect();
+      tip.style.left = (sr.left + (xsc(TS[i+1])/VW)*sr.width - wr.left) + 'px';
+      tip.style.top  = (sr.top  + (ysc(mrs[i])/VH)*sr.height - wr.top) + 'px';
+    });
+    c.addEventListener('mouseleave',()=>{ tip.hidden=true; });
+  });
+})();
+
+// ── Signal summary grid ───────────────────────────────────────────────────────
+(function buildSignalGrid(){
+  const counts = {strong:0, moderate:0, continuous:0, trend:0};
+  SIGS.forEach(s=>{
+    if(s.strong)     counts.strong++;
+    if(s.moderate)   counts.moderate++;
+    if(s.continuous) counts.continuous++;
+    if(s.trend)      counts.trend++;
+  });
+  const anySignal = SIGS.filter(s=>s.strong||s.moderate||s.continuous||s.trend).length;
+
+  const defs = [
+    {key:'strong',     colour:'var(--c-strong)',     label:'Silny sygnał',       rule:'Punkt poza UNPL lub LNPL (±3σ)',       unit:'punktów'},
+    {key:'moderate',   colour:'var(--c-moderate)',   label:'Umiarkowany sygnał', rule:'2 z 3 kolejnych poza URL/LRL (±2σ)',   unit:'punktów'},
+    {key:'continuous', colour:'var(--c-continuous)', label:'Ciągły sygnał',      rule:'3 z 5 kolejnych poza ±1σ',             unit:'punktów'},
+    {key:'trend',      colour:'var(--c-trend)',      label:'Trend',               rule:'5 rosnących/malejących lub 8 po 1 stronie CL', unit:'punktów'},
+  ];
+
+  const grid = document.getElementById('signalGrid');
+  defs.forEach(d=>{
+    const c = counts[d.key];
+    grid.innerHTML += `<div class="sig-stat">
+      <span class="ss-label"><span class="ss-colour" style="background:${d.colour}"></span>${d.label}</span>
+      <div class="ss-count${c>0?' has-signal':''}" style="${c>0?'color:'+d.colour:''}">${c}</div>
+      <p class="ss-desc">${c} ${d.unit} · ${d.rule}</p>
+    </div>`;
+  });
+  grid.innerHTML += `<div class="sig-stat">
+    <span class="ss-label">Razem z sygnałem</span>
+    <div class="ss-count${anySignal>0?' has-signal':''}">${anySignal}</div>
+    <p class="ss-desc">z ${n} obserwacji ma co najmniej jeden sygnał SPC</p>
+  </div>`;
+})();
+
+// ── Parameters grid ───────────────────────────────────────────────────────────
+(function buildParams(){
+  const params = [
+    {label:'X̄', val: xbar.toFixed(2),    cls:'cl',  formula:'Średnia arytmetyczna',      unit:'szt/d'},
+    {label:'MR̄',val: mrbar.toFixed(2),   cls:'cl',  formula:'Średnia ruchomego rozstępu',unit:'szt/d'},
+    {label:'σ̂', val: sigma.toFixed(2),   cls:'cl',  formula:'MR̄ / 1,128',               unit:'szt/d'},
+    {label:'UNPL', val: UNPL.toFixed(2), cls:'npl', formula:'X̄ + 3σ = X̄ + 2,66·MR̄',  unit:'szt/d'},
+    {label:'URL',  val: URL.toFixed(2),  cls:'rl',  formula:'X̄ + 2σ',                   unit:'szt/d'},
+    {label:'LRL',  val: LRL < 0.01 ? '≈ 0' : LRL.toFixed(2), cls:'rl', formula:'X̄ − 2σ, przycięte do 0', unit:'szt/d'},
+    {label:'LNPL', val: LNPL < 0.01 ? '≈ 0' : LNPL.toFixed(2), cls:'npl', formula:'X̄ − 3σ, przycięte do 0', unit:'szt/d'},
+    {label:'UCL_MR',val: UCL_MR.toFixed(2),cls:'npl',formula:'3,267 · MR̄',             unit:'szt/d'},
+  ];
+  const grid = document.getElementById('paramGrid');
+  grid.innerHTML = params.map(p=>`
+    <div class="param-cell">
+      <span class="pc-label">${p.label}</span>
+      <div class="pc-val ${p.cls}">${p.val} <span style="font-size:11px;font-weight:400;color:var(--muted)">${p.unit}</span></div>
+      <p class="pc-formula">${p.formula}</p>
+    </div>`).join('');
+})();
+</script>
+</body>
+</html>
